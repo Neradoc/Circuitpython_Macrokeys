@@ -18,8 +18,7 @@ from adafruit_display_shapes.rect import Rect
 from adafruit_display_text import label
 from adafruit_macropad import MacroPad
 
-from macrokeys.actions import MacroAction, Tone, Type, Color
-from macrokeys.apps import App
+from macrokeys import actions, apps
 
 
 # CONFIGURABLES ------------------------
@@ -32,10 +31,10 @@ macropad = MacroPad()
 macropad.display.auto_refresh = False
 macropad.pixels.auto_write = False
 
-def play_tone(note, duration):
+def _play_tone(note, duration):
     macropad.play_tone(note, duration)
 
-Tone.play_tone = play_tone
+actions.play_tone = _play_tone
 
 # Set up displayio group with all the labels
 group = displayio.Group()
@@ -55,17 +54,8 @@ macropad.display.show(group)
 macropad.group = group
 
 # Load all the macro key setups from .py files in MACRO_FOLDER
-apps = []
-files = os.listdir(MACRO_FOLDER)
-files.sort()
-for filename in files:
-    if filename.endswith('.py') and filename[0] != ".":
-        try:
-            module = __import__(MACRO_FOLDER + '/' + filename[:-3])
-            apps.append(App(macropad, module.app))
-        except (SyntaxError, ImportError, AttributeError, KeyError, NameError,
-                IndexError, TypeError) as err:
-            traceback.print_exception(err, err, err.__traceback__)
+
+apps = apps.load_apps(macropad, MACRO_FOLDER)
 
 if not apps:
     group[13].text = 'NO MACRO FILES FOUND'
@@ -129,13 +119,13 @@ while True:
             past_items.append(item)
             if item == 0:
                 for item in sequence:
-                    if isinstance(item, MacroAction):
+                    if isinstance(item, actions.MacroAction):
                         item.release()
-            elif isinstance(item, MacroAction):
+            elif isinstance(item, actions.MacroAction):
                 item.action()
             elif isinstance(item, float):
                 time.sleep(item)
-            elif isinstance(item, Color):
+            elif isinstance(item, actions.Color):
                 macropad.pixels[key_number] = item.color
             elif callable(item):
                 item(pad=macropad, key=key_number, idx=index)
@@ -147,13 +137,13 @@ while True:
                     macropad.keyboard.release(item)
             elif isinstance(item, str):
                 # compatibility
-                Type.write(item)
+                actions.Type.write(item)
             else:
                 print("Unkown action", item)
     else:
         # Release any still-pressed keys
         for item in sequence:
-            if isinstance(item, MacroAction):
+            if isinstance(item, actions.MacroAction):
                 item.release()
             # compatibility
             if isinstance(item, int) and item >= 0:

@@ -11,6 +11,8 @@ import adafruit_hid.mouse
 
 common_mouse = adafruit_hid.mouse.Mouse(usb_hid.devices)
 common_keyboard = Keyboard(usb_hid.devices)
+common_control = ConsumerControl(usb_hid.devices)
+play_tone = None
 
 # config in macros_config.py
 RELEASE_DELAY = 0.02
@@ -141,17 +143,16 @@ class Shortcut(MacroAction):
                 raise ValueError("Bad type of Shortcut action:" + repr(action))
         super().__init__(*acts, neg=neg)
     def press(self):
-        self.keyboard.press(*self.actions)
+        common_keyboard.press(*self.actions)
     def release(self):
-        self.keyboard.release(*self.actions)
+        common_keyboard.release(*self.actions)
     def send(self):
-        self.keyboard.send(*self.actions)
+        common_keyboard.send(*self.actions)
 
 class Control(MacroAction):
     """
     Action to press/release a ConsumerControl key (only one at a time).
     """
-    control = ConsumerControl(usb_hid.devices)
     def __init__(self, action, *, neg=False):
         if isinstance(action, int):
             code = action
@@ -161,11 +162,11 @@ class Control(MacroAction):
             raise ValueError("Bad type of Control action:" + repr(action))
         super().__init__(code, neg=neg)
     def press(self):
-        self.control.press(*self.actions)
+        common_control.press(*self.actions)
     def release(self):
-        self.control.release()  # only one key at a time anyway
+        common_control.release()  # only one key at a time anyway
     def send(self):
-        self.control.send(*self.actions)
+        common_control.send(*self.actions)
 
 class Midi(MacroAction):
     """
@@ -209,7 +210,7 @@ class Type(MacroAction):
         pass
     def send(self):
         self.press()
-    @classmethod
+    @staticmethod
     def write(text):
         layout.write(text)
 
@@ -242,9 +243,8 @@ class Color:
 class Tone(MacroAction):
     """
     Action to play a tone - needs to be configured first.
-    macro_actions.Tone.play_tone = lambda note, duration: pad.play_tone(note, duration)
+    macrokeys.action.play_tone = lambda note, duration: pad.play_tone(note, duration)
     """
-    play_tone = None
     def __init__(self, *actions, neg=False):
         acts = []
         for data in actions:
@@ -264,7 +264,8 @@ class Tone(MacroAction):
     def press(self):
         for note, duration in self.actions:
             if note > 0:
-                Tone.play_tone(note, duration)
+                if callable(play_tone):
+                    play_tone(note, duration)
             else:
                 time.sleep(duration)
 

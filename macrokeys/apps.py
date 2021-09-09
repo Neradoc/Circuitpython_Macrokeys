@@ -1,3 +1,6 @@
+import os
+import traceback
+
 class App:
     """ Class representing a host-side application, for which we have a set
         of macro sequences. Project code was originally more complex and
@@ -38,3 +41,18 @@ class App:
         # the current app's "enter" custom code
         if self._enter:
             self._enter(pad=self.macropad, prev_app=prev_app, next_app=self)
+
+def load_apps(macropad, MACRO_FOLDER):
+    apps = []
+    files = os.listdir(MACRO_FOLDER)
+    files.sort()
+    for filename in files:
+        if filename.endswith('.py') and filename[0] != ".":
+            try:
+                module = __import__(MACRO_FOLDER + '/' + filename[:-3])
+                apps.append(App(macropad, module.app))
+            except (SyntaxError, ImportError, AttributeError, KeyError, NameError,
+                    IndexError, TypeError) as err:
+                traceback.print_exception(err, err, err.__traceback__)
+    return apps
+
