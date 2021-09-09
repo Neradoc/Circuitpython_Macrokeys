@@ -51,7 +51,7 @@ app = {                    # REQUIRED dict, must be named 'app'
         ) ),
         # 4th row ----------
         (0x101010, 'a', Shortcut("A")),
-        (0x800000, 'M', Shortcut("SHIFT", "M")),
+        (0x800000, 'M', [ "hello", 0x30 ]),
         (0x101010, 'Hello', Type("Hello 123")),
         # Encoder button ---
         (0x000000, '', onoff)
