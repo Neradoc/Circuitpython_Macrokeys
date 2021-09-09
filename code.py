@@ -18,7 +18,7 @@ from adafruit_display_shapes.rect import Rect
 from adafruit_display_text import label
 from adafruit_macropad import MacroPad
 
-from macrokeys import actions, apps
+from macrokeys import actions, application
 
 
 # CONFIGURABLES ------------------------
@@ -55,7 +55,7 @@ macropad.group = group
 
 # Load all the macro key setups from .py files in MACRO_FOLDER
 
-apps = apps.load_apps(macropad, MACRO_FOLDER)
+apps = application.load_apps(macropad, MACRO_FOLDER)
 
 if not apps:
     group[13].text = 'NO MACRO FILES FOUND'
@@ -100,54 +100,8 @@ while True:
     # and there IS a corresponding macro available for it...other situations
     # are avoided by 'continue' statements above which resume the loop.
 
-    sequence = apps[app_index].macros[key_number][2]
-    if not isinstance(sequence, (list, tuple)):
-        sequence = (sequence,)
+    macros = apps[app_index].macros[key_number]
     if pressed:
-        # the sequence is arbitrary-length
-        # each item in the sequence is either
-        # an action instance or a floating point value
-        # Action   ==>  execute the action
-        # Float    ==>  sleep in seconds
-        # Funciton ==>  call it with context
-        if key_number < 12: # No pixel for encoder button
-            macropad.pixels[key_number] = 0xFFFFFF
-            macropad.pixels.show()
-        past_items = []
-        past_keycodes = set()  # for compatibility
-        for index, item in enumerate(sequence):
-            past_items.append(item)
-            if item == 0:
-                for item in sequence:
-                    if isinstance(item, actions.MacroAction):
-                        item.release()
-            elif isinstance(item, actions.MacroAction):
-                item.action()
-            elif isinstance(item, float):
-                time.sleep(item)
-            elif isinstance(item, actions.Color):
-                macropad.pixels[key_number] = item.color
-            elif callable(item):
-                item(pad=macropad, key=key_number, idx=index)
-            elif isinstance(item, int):
-                # compatibility
-                if item > 0:
-                    macropad.keyboard.press(item)
-                else:
-                    macropad.keyboard.release(item)
-            elif isinstance(item, str):
-                # compatibility
-                actions.Type.write(item)
-            else:
-                print("Unkown action", item)
+        application.button_press(macropad, key_number, macros)
     else:
-        # Release any still-pressed keys
-        for item in sequence:
-            if isinstance(item, actions.MacroAction):
-                item.release()
-            # compatibility
-            if isinstance(item, int) and item >= 0:
-                macropad.keyboard.release(item)
-        if key_number < 12: # No pixel for encoder button
-            macropad.pixels[key_number] = apps[app_index].macros[key_number][0]
-            macropad.pixels.show()
+        application.button_release(macropad, key_number, macros)

@@ -41,18 +41,6 @@ if not layout:
     from adafruit_hid import keyboard_layout_us
     layout = keyboard_layout_us.KeyboardLayoutUS(common_keyboard)
 
-def default_keycode():
-    global keycodes
-    if keycodes:
-        return keycodes
-    return keycodes
-
-def default_layout():
-    global layout
-    if layout:
-        return layout
-    return layout
-
 def note_to_midi(code):
     if isinstance(code, str):
         if len(code) and code[0] in BASE_NOTES_MIDI:
