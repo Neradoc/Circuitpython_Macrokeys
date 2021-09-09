@@ -1,5 +1,5 @@
 # MACROPAD Hotkeys example: Microsoft Edge web browser for Windows
-from macro_actions import Shortcut, Type
+from macrokeys import *
 
 app = {                      # REQUIRED dict, must be named 'app'
     'name' : 'Windows Edge', # Application name

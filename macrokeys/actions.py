@@ -1,4 +1,3 @@
-import os
 import time
 import usb_hid
 import usb_midi
@@ -19,38 +18,38 @@ RELEASE_DELAY = 0.02
 BASE_NOTES_MIDI = { "C": 24, "D": 26, "E": 28, "F": 29, "G": 31, "A": 33, "B": 35 }
 BASE_NOTES_FREQ = { "C": 261.63, "C#": 277.18, "D": 293.66, "D#": 311.13, "E":  329.63, "F": 349.23, "F#": 369.99, "G": 392.00, "F#": 415.30, "A": 440.00, "A#": 466.16, "B": 493.88 }
 
-_default_keycode = None
-_default_layout = None
+keycodes = None
+layout = None
+
+try:
+    import macros_config as _macros_config
+    if hasattr(_macros_config, "default_keycode"):
+        keycodes = _macros_config.default_keycode
+    if hasattr(_macros_config, "default_layout"):
+        layout = _macros_config.default_layout(common_keyboard)
+    if hasattr(_macros_config, "RELEASE_DELAY"):
+        RELEASE_DELAY = _macros_config.RELEASE_DELAY
+except ImportError:
+    pass
+
+if not keycodes:
+    from adafruit_hid import keycode
+    keycodes = keycode.Keycode
+if not layout:
+    from adafruit_hid import keyboard_layout_us
+    layout = keyboard_layout_us.KeyboardLayoutUS(common_keyboard)
 
 def default_keycode():
-    global _default_keycode
-    if _default_keycode:
-        return _default_keycode
-    try:
-        import macros_config
-        _default_keycode = macros_config.default_keycode
-        return _default_keycode
-    except Exception as ex:
-        import traceback
-        traceback.print_exception(ex,ex,ex.__traceback__)
-        from adafruit_hid import keycode
-        _default_keycode = keycode.Keycode
-        return _default_keycode
+    global keycodes
+    if keycodes:
+        return keycodes
+    return keycodes
 
 def default_layout():
-    global _default_layout
-    if _default_layout:
-        return _default_layout
-    try:
-        import macros_config
-        _default_layout = macros_config.default_layout(common_keyboard)
-        return _default_layout
-    except Exception as ex:
-        import traceback
-        traceback.print_exception(ex,ex,ex.__traceback__)
-        from adafruit_hid import keyboard_layout_us
-        _default_layout = keyboard_layout_us.KeyboardLayoutUS(common_keyboard)
-        return _default_layout
+    global layout
+    if layout:
+        return layout
+    return layout
 
 def note_to_midi(code):
     if isinstance(code, str):
@@ -127,22 +126,17 @@ class Shortcut(MacroAction):
     Takes ints or converts strings using getattr on the Keycode class.
     Defaults to layout.keycodes() if code not found.
     """
-    keyboard = common_keyboard
-    keycode = None
     def __init__(self, *actions, neg=False):
-        if Shortcut.keycode == None:
-            Shortcut.keycode = default_keycode()
         acts = []
         for action in actions:
             if isinstance(action, int):
                 acts.append(action)
             elif isinstance(action, str):
-                if hasattr(self.keycode, action):
-                    code = getattr(self.keycode, action)
+                if hasattr(keycodes, action):
+                    code = getattr(keycodes, action)
                     acts.append(code)
                 elif len(action) == 1:
-                    Type.layout = default_layout()
-                    acts += Type.layout.keycodes(action)
+                    acts += layout.keycodes(action)
             else:
                 raise ValueError("Bad type of Shortcut action:" + repr(action))
         super().__init__(*acts, neg=neg)
@@ -206,51 +200,44 @@ class Type(MacroAction):
     Action to write a string with a layout, use via a LayoutFactory,
     so you don't have to repeat the "layout" argument in your macros.
     """
-    layout = None
     def __init__(self, *actions, neg=False):
         super().__init__(*actions, neg=neg)
-        if self.layout == None:
-            Type.layout = default_layout()
     def press(self):
         for action in self.actions:
-            self.layout.write(action)
+            layout.write(action)
     def release(self):
         pass
     def send(self):
         self.press()
     @classmethod
     def write(text):
-        if self.layout == None:
-            Type.layout = default_layout()
-        Type.layout.write(text)
+        layout.write(text)
 
-# Color not yet implemented for hotkeys.
-
-# class Color:
-#     """
-#     Encodes the default color of the button.
-#     Encodes the temporary color when pressed, with -Color(x).
-#     A color value can be:
-#     - an int: 0xRRGGBB
-#     - a css color: "#RRGGBB"
-#     - a tuple (r, g, b)
-#     """
-#     def __init__(self, color, *, press=False):
-#         self.press = press
-#         if isinstance(color, tuple):
-#             self.color = color
-#         elif isinstance(color, int):
-#             c = color
-#             self.color = (c >> 16 & 0xFF, c >> 8 & 0xFF, c & 0xFF)
-#         elif isinstance(color, str):
-#             c = int(color.replace("#",""), 16)
-#             self.color = (c >> 16 & 0xFF, c >> 8 & 0xFF, c & 0xFF)
-#         else:
-#             raise ValueError("Color value invalid, give tuple, int or hexa string")
-#     def __repr__(self):
-#         return ("+" if self.press else "-") + f"Color{self.color}"
-#     def __neg__(self):
-#         return self.__class__(self.color, press = not self.press)
+class Color:
+    """
+    Encodes the default color of the button.
+    Encodes the temporary color when pressed, with -Color(x).
+    A color value can be:
+    - an int: 0xRRGGBB
+    - a css color: "#RRGGBB"
+    - a tuple (r, g, b)
+    """
+    def __init__(self, color, *, press=False):
+        self.press = press
+        if isinstance(color, tuple):
+            self.color = color
+        elif isinstance(color, int):
+            c = color
+            self.color = (c >> 16 & 0xFF, c >> 8 & 0xFF, c & 0xFF)
+        elif isinstance(color, str):
+            c = int(color.replace("#",""), 16)
+            self.color = (c >> 16 & 0xFF, c >> 8 & 0xFF, c & 0xFF)
+        else:
+            raise ValueError("Color value invalid, give tuple, int or hexa string")
+    def __repr__(self):
+        return ("+" if self.press else "-") + f"Color{self.color}"
+    def __neg__(self):
+        return self.__class__(self.color, press = not self.press)
 
 class Tone(MacroAction):
     """

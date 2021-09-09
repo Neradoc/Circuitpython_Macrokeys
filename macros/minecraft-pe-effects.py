@@ -4,7 +4,7 @@
 #       to result in silent failure.  Therefore, the key sequences are split
 #       across multiple lines.
 
-from macro_actions import S, Type
+from macrokeys import *
 
 # See https://minecraft.fandom.com/wiki/Effect
 

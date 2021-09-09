@@ -2,8 +2,7 @@
 
 # Note: Must enable "full keyboad gameplay" for Prev/Next buttons to work.
 #       This is found under "settings", then "keyboard and mouse".
-
-from macro_actions import Shortcut
+from macrokeys import *
 
 app = {                          # REQUIRED dict, must be named 'app'
     'name' : 'Minecraft Hotbar', # Application name

@@ -1,5 +1,5 @@
 # MACROPAD Hotkeys example: Adobe Illustrator for Windows
-from macro_actions import Shortcut
+from macrokeys import *
 
 app = {                         # REQUIRED dict, must be named 'app'
     'name' : 'Win Illustrator', # Application name

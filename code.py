@@ -13,59 +13,18 @@ import time
 import displayio
 import terminalio
 import traceback
+
 from adafruit_display_shapes.rect import Rect
 from adafruit_display_text import label
 from adafruit_macropad import MacroPad
-from macro_actions import MacroAction, Tone, Type
+
+from macrokeys.actions import MacroAction, Tone, Type, Color
+from macrokeys.apps import App
 
 
 # CONFIGURABLES ------------------------
 
 MACRO_FOLDER = '/macros'
-
-
-# CLASSES AND FUNCTIONS ----------------
-
-class App:
-    """ Class representing a host-side application, for which we have a set
-        of macro sequences. Project code was originally more complex and
-        this was helpful, but maybe it's excessive now?"""
-    def __init__(self, appdata):
-        self.name = appdata['name']
-        self.macros = appdata['macros']
-        self._enter = None
-        if "enter" in appdata and callable(appdata['enter']):
-            self._enter = appdata['enter']
-        self._leave = None
-        if "leave" in appdata and callable(appdata['leave']):
-            self._leave = appdata['leave']
-
-
-    def switch(self, prev_app=None):
-        """ Activate application settings; update OLED labels and LED
-            colors. """
-        # the previous app's "leave" custom code
-        if prev_app and prev_app._leave:
-            prev_app._leave(pad=macropad, prev_app=prev_app, next_app=self)
-        # do the switch
-        group[13].text = self.name   # Application name
-        for i in range(12):
-            if i < len(self.macros): # Key in use, set label + LED color
-                macropad.pixels[i] = self.macros[i][0]
-                group[i].text = self.macros[i][1]
-            else:  # Key not in use, no label or LED
-                macropad.pixels[i] = 0
-                group[i].text = ''
-        macropad.keyboard.release_all()
-        macropad.consumer_control.release()
-        macropad.mouse.release_all()
-        macropad.stop_tone()
-        macropad.pixels.show()
-        macropad.display.refresh()
-        # the current app's "enter" custom code
-        if self._enter:
-            self._enter(pad=macropad, prev_app=prev_app, next_app=self)
-
 
 # INITIALIZATION -----------------------
 
@@ -103,7 +62,7 @@ for filename in files:
     if filename.endswith('.py') and filename[0] != ".":
         try:
             module = __import__(MACRO_FOLDER + '/' + filename[:-3])
-            apps.append(App(module.app))
+            apps.append(App(macropad, module.app))
         except (SyntaxError, ImportError, AttributeError, KeyError, NameError,
                 IndexError, TypeError) as err:
             traceback.print_exception(err, err, err.__traceback__)
@@ -164,7 +123,10 @@ while True:
         if key_number < 12: # No pixel for encoder button
             macropad.pixels[key_number] = 0xFFFFFF
             macropad.pixels.show()
-        for index,item in enumerate(sequence):
+        past_items = []
+        past_keycodes = set()  # for compatibility
+        for index, item in enumerate(sequence):
+            past_items.append(item)
             if item == 0:
                 for item in sequence:
                     if isinstance(item, MacroAction):
@@ -173,6 +135,8 @@ while True:
                 item.action()
             elif isinstance(item, float):
                 time.sleep(item)
+            elif isinstance(item, Color):
+                macropad.pixels[key_number] = item.color
             elif callable(item):
                 item(pad=macropad, key=key_number, idx=index)
             elif isinstance(item, int):

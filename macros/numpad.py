@@ -1,5 +1,5 @@
 # MACROPAD Hotkeys example: Universal Numpad
-from macro_actions import Shortcut
+from macrokeys import *
 
 app = {                    # REQUIRED dict, must be named 'app'
     'name' : 'Numpad', # Application name

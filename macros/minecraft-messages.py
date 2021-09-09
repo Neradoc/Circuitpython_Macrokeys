@@ -4,7 +4,7 @@
 #       to result in silent failure.  Therefore, the key sequences are split
 #       across multiple lines.
 
-from macro_actions import S, Type
+from macrokeys import *
 
 # NOTE: There appears to be some delay when bringing up the command screen.
 

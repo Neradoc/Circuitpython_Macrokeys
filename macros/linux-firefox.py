@@ -1,6 +1,5 @@
 # MACROPAD Hotkeys example: Firefox web browser for Linux
-
-from macro_actions import Shortcut, Type
+from macrokeys import *
 
 app = {                    # REQUIRED dict, must be named 'app'
     'name' : 'Linux Firefox', # Application name

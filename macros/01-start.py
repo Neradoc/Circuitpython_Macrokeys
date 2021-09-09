@@ -1,5 +1,5 @@
 # MACROPAD Hotkeys example: Universal Numpad
-from macro_actions import Shortcut, Type, Tone, Control, Mouse
+from macrokeys import *
 import time
 
 def onoff(pad, key, idx):

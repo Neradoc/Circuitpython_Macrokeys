@@ -1,5 +1,5 @@
 # MACROPAD Hotkeys example: Adobe Photoshop for Mac
-from macro_actions import Shortcut
+from macrokeys import *
 
 app = {                       # REQUIRED dict, must be named 'app'
     'name' : 'Mac Photoshop', # Application name
