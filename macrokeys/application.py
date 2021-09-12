@@ -31,14 +31,70 @@ class App:
             self._enter(pad=self.macro_keypad, prev_app=prev_app, next_app=self)
 
 
-def load_apps(macro_keypad, MACRO_FOLDER):
+    def button_press(self, key_number):
+        # the sequence is arbitrary-length
+        # each item in the sequence is either
+        # an action instance or a floating point value
+        # Action   ==>  execute the action
+        # Float    ==>  sleep in seconds
+        # Function ==>  call it with context
+        sequence = self.macros[key_number][2]
+        if not isinstance(sequence, (list, tuple)):
+            sequence = (sequence,)
+        # light the matching LED
+        # TODO: this should a parametrised value
+        self.macro_keypad.set_led(key_number, 0xFFFFFF)
+        self.macro_keypad.show_leds()
+        for index, item in enumerate(sequence):
+            if item == 0:
+                for item in sequence:
+                    if isinstance(item, actions.MacroAction):
+                        item.release()
+            elif isinstance(item, actions.MacroAction):
+                item.action()
+            elif isinstance(item, float):
+                time.sleep(item)
+            elif isinstance(item, actions.Color):
+                self.macro_keypad.set_led(key_number, item.color)
+                self.macro_keypad.show_leds()
+            elif callable(item):
+                item(app=self, key=key_number, idx=index)
+            elif isinstance(item, int):
+                # compatibility
+                if item > 0:
+                    self.macro_keypad.keyboard.press(item)
+                else:
+                    self.macro_keypad.keyboard.release(item)
+            elif isinstance(item, str):
+                # compatibility
+                actions.layout.write(item)
+            else:
+                print("Unkown action", item)
+
+
+    def button_release(self, key_number):
+        sequence = self.macros[key_number][2]
+        if not isinstance(sequence, (list, tuple)):
+            sequence = (sequence,)
+        # Release any still-pressed keys
+        for item in sequence:
+            if isinstance(item, actions.MacroAction):
+                item.release()
+            # compatibility
+            if isinstance(item, int) and item >= 0:
+                self.macro_keypad.keyboard.release(item)
+        self.macro_keypad.set_led(key_number, self.macros[key_number][0])
+        self.macro_keypad.show_leds()
+
+
+def load_apps(macro_keypad, macro_folder):
     apps = []
-    files = os.listdir(MACRO_FOLDER)
+    files = os.listdir(macro_folder)
     files.sort()
     for filename in files:
         if filename.endswith('.py') and filename[0] != ".":
             try:
-                module = __import__(MACRO_FOLDER + '/' + filename[:-3])
+                module = __import__(macro_folder + '/' + filename[:-3])
                 apps.append(App(macro_keypad, module.app))
             except (SyntaxError, ImportError, AttributeError, KeyError, NameError,
                     IndexError, TypeError) as err:
