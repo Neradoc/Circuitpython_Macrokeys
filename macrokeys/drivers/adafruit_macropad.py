@@ -10,7 +10,8 @@ class MacroPadDriver(KeypadBase):
         return self.backend.play_tone(note, duration)
 
     def set_led(self, pos, color):
-        self.backend.pixels[pos] = color
+        if pos in range(12):
+            self.backend.pixels[pos] = color
 
     def show_leds(self):
         self.backend.pixels.show()

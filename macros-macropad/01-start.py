@@ -2,13 +2,15 @@
 from macrokeys import *
 import time
 
-def onoff(pad, key, idx):
-    # pad.display.brightness = 0
-    pad.backend.group.hidden = not pad.group.hidden
-    pad.backend.display.refresh()
-    if pad.backend.group.hidden:
-        pad.fill_leds(0)
-        pad.show_leds()
+def onoff(app, key, idx):
+    app.macro_keypad.night_mode = not app.macro_keypad.night_mode
+    app.macro_keypad.backend.group.hidden = app.macro_keypad.night_mode
+    app.macro_keypad.backend.display.refresh()
+    if app.macro_keypad.night_mode:
+        app.macro_keypad.fill_leds(0)
+        app.macro_keypad.show_leds()
+    else:
+        app.reset_leds()
 
 beep = Tone(("C6", 0.08), 0.05, ("E6", 0.10))
 

@@ -104,7 +104,7 @@ while True:
         if len(apps[app_index].macros) < 13:
             continue    # No 13th macro, just resume main loop
         key_number = 12 # else process below as 13th macro
-        pressed = encoder_switch
+        pressed = True
     else:
         event = macropad.keys.events.get()
         if not event or event.key_number >= len(apps[app_index].macros):
