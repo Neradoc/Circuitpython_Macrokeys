@@ -116,7 +116,6 @@ if not apps:
 
 # the last position being None makes the loop start with switching to a page
 last_position = None
-last_encoder_switch = macropad.encoder_switch_debounced.pressed
 app_index = 0
 
 
@@ -135,9 +134,8 @@ while True:
     # corresponding macro, set up variables to act on this just like
     # the keypad keys, as if it were a 13th key/macro.
     macropad.encoder_switch_debounced.update()
-    encoder_switch = macropad.encoder_switch_debounced.pressed
-    if encoder_switch != last_encoder_switch:
-        last_encoder_switch = encoder_switch
+    encoder_switch_pressed = macropad.encoder_switch_debounced.pressed
+    if encoder_switch_pressed:
         if len(apps[app_index].macros) < 13:
             continue    # No 13th macro, just resume main loop
         key_number = 12 # else process below as 13th macro
