@@ -18,7 +18,7 @@ from adafruit_display_shapes.rect import Rect
 from adafruit_display_text import label
 from adafruit_macropad import MacroPad
 
-from macrokeys import actions
+from macrokeys import actions, application
 from macrokeys.drivers.adafruit_macropad import MacroPadDriver
 
 
@@ -53,7 +53,7 @@ macropad.group = group
 
 # Load all the macro key setups from .py files in MACRO_FOLDER
 
-apps = macro_keypad.load_apps(MACRO_FOLDER)
+apps = application.load_apps(macro_keypad, MACRO_FOLDER)
 
 if not apps:
     group[13].text = 'NO MACRO FILES FOUND'
@@ -116,8 +116,7 @@ while True:
     # and there IS a corresponding macro available for it...other situations
     # are avoided by 'continue' statements above which resume the loop.
 
-    macros = apps[app_index].macros[key_number]
     if pressed:
-        macro_keypad.button_press(key_number, macros)
+        apps[app_index].button_press(key_number)
     else:
-        macro_keypad.button_release(key_number, macros)
+        apps[app_index].button_release(key_number)
