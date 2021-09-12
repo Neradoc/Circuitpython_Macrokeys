@@ -24,7 +24,7 @@ from macrokeys.drivers.adafruit_macropad import MacroPadDriver
 
 # CONFIGURABLES ------------------------
 
-MACRO_FOLDER = '/macros'
+MACRO_FOLDER = '/macros-macropad'
 
 # INITIALIZATION -----------------------
 
