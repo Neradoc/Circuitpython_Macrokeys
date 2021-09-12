@@ -1,8 +1,10 @@
 from .. import actions
 from ..driver_base import KeypadBase
 
+
 def num_to_col(c):
     return (c >> 16 & 0xFF, c >> 8 & 0xFF, c & 0xFF)
+
 
 class KeybowDriver(KeypadBase):
     def __init__(self, backend):

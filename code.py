@@ -1,4 +1,5 @@
 import os
+
 machine = os.uname().machine.lower()
 if "macropad" in machine:
     import code_macropad

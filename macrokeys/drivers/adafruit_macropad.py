@@ -1,6 +1,7 @@
 from .. import actions
 from ..driver_base import KeypadBase
 
+
 class MacroPadDriver(KeypadBase):
     def __init__(self, backend):
         super().__init__(backend)

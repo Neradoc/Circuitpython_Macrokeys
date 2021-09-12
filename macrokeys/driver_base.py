@@ -3,7 +3,8 @@ import traceback
 from . import actions
 from .application import App
 
-class KeypadBase():
+
+class KeypadBase:
     def __init__(self, backend):
         self.backend = backend
         self.night_mode = False

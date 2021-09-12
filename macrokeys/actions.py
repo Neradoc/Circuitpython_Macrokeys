@@ -17,14 +17,28 @@ play_tone = None
 # config in macros_config.py
 RELEASE_DELAY = 0.02
 
-BASE_NOTES_MIDI = { "C": 24, "D": 26, "E": 28, "F": 29, "G": 31, "A": 33, "B": 35 }
-BASE_NOTES_FREQ = { "C": 261.63, "C#": 277.18, "D": 293.66, "D#": 311.13, "E":  329.63, "F": 349.23, "F#": 369.99, "G": 392.00, "F#": 415.30, "A": 440.00, "A#": 466.16, "B": 493.88 }
+BASE_NOTES_MIDI = {"C": 24, "D": 26, "E": 28, "F": 29, "G": 31, "A": 33, "B": 35}
+BASE_NOTES_FREQ = {
+    "C": 261.63,
+    "C#": 277.18,
+    "D": 293.66,
+    "D#": 311.13,
+    "E": 329.63,
+    "F": 349.23,
+    "F#": 369.99,
+    "G": 392.00,
+    "F#": 415.30,
+    "A": 440.00,
+    "A#": 466.16,
+    "B": 493.88,
+}
 
 keycodes = None
 layout = None
 
 try:
     import macros_config as _macros_config
+
     if hasattr(_macros_config, "default_keycode"):
         keycodes = _macros_config.default_keycode
     if hasattr(_macros_config, "default_layout"):
@@ -36,17 +50,20 @@ except ImportError:
 
 if not keycodes:
     from adafruit_hid import keycode
+
     keycodes = keycode.Keycode
 if not layout:
     from adafruit_hid import keyboard_layout_us
+
     layout = keyboard_layout_us.KeyboardLayoutUS(common_keyboard)
+
 
 def note_to_midi(code):
     if isinstance(code, str):
         if len(code) and code[0] in BASE_NOTES_MIDI:
             note = BASE_NOTES_MIDI[code[0]]
         else:
-            raise ValueError("Unknown note: "+repr(code))
+            raise ValueError("Unknown note: " + repr(code))
         delta = ""
         for nn in code[1:]:
             if nn == "-":
@@ -58,6 +75,7 @@ def note_to_midi(code):
         return note
     return code
 
+
 def note_to_frequency(code):
     if isinstance(code, str):
         nn = code
@@ -68,7 +86,7 @@ def note_to_frequency(code):
             note = BASE_NOTES_FREQ[code[0]]
             code = code[1:]
         else:
-            raise ValueError("Unknown note: "+repr(code))
+            raise ValueError("Unknown note: " + repr(code))
         delta = 1
         if code[0] == "-":
             delta = -1
@@ -81,32 +99,41 @@ def note_to_frequency(code):
         return note
     return code
 
+
 class MacroAction:
     """
     Parent action class.
     An action describes a group of keys to press or release together.
     A normal action is for a press, a negative action is for release.
     """
+
     def __init__(self, *actions, neg=False):
         self.actions = actions
         self.neg = neg
+
     def press(self):
         raise NotImplementedError("MacroAction must be subclassed to press()")
+
     def release(self):
         raise NotImplementedError("MacroAction must be subclassed to release()")
+
     def action(self):
         if self.neg:
             self.release()
         else:
             self.press()
+
     def send(self):
         self.press()
         time.sleep(RELEASE_DELAY)
         self.release()
+
     def __neg__(self):
-        return self.__class__(*self.actions, neg = not self.neg)
+        return self.__class__(*self.actions, neg=not self.neg)
+
     def __repr__(self):
         return ("-" if self.neg else "+") + repr(self.actions)
+
 
 class Shortcut(MacroAction):
     """
@@ -116,6 +143,7 @@ class Shortcut(MacroAction):
     Takes ints or converts strings using getattr on the Keycode class.
     Defaults to layout.keycodes() if code not found.
     """
+
     def __init__(self, *actions, neg=False):
         acts = []
         for action in actions:
@@ -130,17 +158,22 @@ class Shortcut(MacroAction):
             else:
                 raise ValueError("Bad type of Shortcut action:" + repr(action))
         super().__init__(*acts, neg=neg)
+
     def press(self):
         common_keyboard.press(*self.actions)
+
     def release(self):
         common_keyboard.release(*self.actions)
+
     def send(self):
         common_keyboard.send(*self.actions)
+
 
 class Control(MacroAction):
     """
     Action to press/release a ConsumerControl key (only one at a time).
     """
+
     def __init__(self, action, *, neg=False):
         if isinstance(action, int):
             code = action
@@ -149,18 +182,24 @@ class Control(MacroAction):
         else:
             raise ValueError("Bad type of Control action:" + repr(action))
         super().__init__(code, neg=neg)
+
     def press(self):
         common_control.press(*self.actions)
+
     def release(self):
         common_control.release()  # only one key at a time anyway
+
     def send(self):
         common_control.send(*self.actions)
+
 
 class Midi(MacroAction):
     """
     Action to press/release a list of midi keys together.
     """
+
     midi = MIDI(midi_out=usb_midi.ports[1], out_channel=0)
+
     def __init__(self, *actions, neg=False):
         acts = []
         for data in actions:
@@ -171,36 +210,46 @@ class Midi(MacroAction):
                     velocity = data[1]
             else:
                 note = note_to_midi(data)
-            acts.append( (note, velocity) )
+            acts.append((note, velocity))
         super().__init__(*acts, neg=neg)
+
     def press(self):
         for note, velocity in self.actions:
             self.midi.send(NoteOn(note, velocity))
+
     def release(self):
         for note, velocity in self.actions:
             self.midi.send(NoteOff(note, 0))
+
     def send(self):
         self.press()
         time.sleep(RELEASE_DELAY)
         self.release()
+
 
 class Type(MacroAction):
     """
     Action to write a string with a layout, use via a LayoutFactory,
     so you don't have to repeat the "layout" argument in your macros.
     """
+
     def __init__(self, *actions, neg=False):
         super().__init__(*actions, neg=neg)
+
     def press(self):
         for action in self.actions:
             layout.write(action)
+
     def release(self):
         pass
+
     def send(self):
         self.press()
+
     @staticmethod
     def write(text):
         layout.write(text)
+
 
 class Color:
     """
@@ -211,6 +260,7 @@ class Color:
     - a css color: "#RRGGBB"
     - a tuple (r, g, b)
     """
+
     def __init__(self, color, *, press=False):
         self.press = press
         if isinstance(color, tuple):
@@ -219,20 +269,24 @@ class Color:
             c = color
             self.color = (c >> 16 & 0xFF, c >> 8 & 0xFF, c & 0xFF)
         elif isinstance(color, str):
-            c = int(color.replace("#",""), 16)
+            c = int(color.replace("#", ""), 16)
             self.color = (c >> 16 & 0xFF, c >> 8 & 0xFF, c & 0xFF)
         else:
             raise ValueError("Color value invalid, give tuple, int or hexa string")
+
     def __repr__(self):
         return ("+" if self.press else "-") + f"Color{self.color}"
+
     def __neg__(self):
-        return self.__class__(self.color, press = not self.press)
+        return self.__class__(self.color, press=not self.press)
+
 
 class Tone(MacroAction):
     """
     Action to play a tone - needs to be configured first.
     macrokeys.action.play_tone = lambda note, duration: pad.play_tone(note, duration)
     """
+
     def __init__(self, *actions, neg=False):
         acts = []
         for data in actions:
@@ -241,12 +295,14 @@ class Tone(MacroAction):
                 note = note_to_frequency(data[0])
                 if len(data) > 1:
                     duration = data[1]
-            elif isinstance(data, (int,float)):
+            elif isinstance(data, (int, float)):
                 note = 0
                 duration = data
             else:
-                raise ValueError("Invalid note: "+repr(data)+" use tuple or number.")
-            acts.append( (note, duration) )
+                raise ValueError(
+                    "Invalid note: " + repr(data) + " use tuple or number."
+                )
+            acts.append((note, duration))
         super().__init__(*acts, neg=neg)
 
     def press(self):
@@ -260,10 +316,12 @@ class Tone(MacroAction):
     def release(self):
         pass
 
+
 class Mouse(MacroAction):
     """
     Action to press/release a mouse button or move the mouse.
     """
+
     def __init__(self, button=0, x=0, y=0, wheel=0, neg=False):
         self.button = button
         self.x = x
@@ -271,6 +329,7 @@ class Mouse(MacroAction):
         self.wheel = wheel
         self.neg = neg
         super().__init__(button, x, y, wheel, neg=neg)
+
     def press(self):
         if self.button == 1:
             common_mouse.press(adafruit_hid.mouse.Mouse.LEFT_BUTTON)
@@ -279,6 +338,7 @@ class Mouse(MacroAction):
         elif self.button == 3:
             common_mouse.press(adafruit_hid.mouse.Mouse.MIDDLE_BUTTON)
         common_mouse.move(self.x, self.y, self.wheel)
+
     def release(self):
         if self.button == 1:
             common_mouse.release(adafruit_hid.mouse.Mouse.LEFT_BUTTON)
@@ -286,9 +346,11 @@ class Mouse(MacroAction):
             common_mouse.release(adafruit_hid.mouse.Mouse.RIGHT_BUTTON)
         elif self.button == 3:
             common_mouse.release(adafruit_hid.mouse.Mouse.MIDDLE_BUTTON)
+
     def send(self):
         self.press()
         self.release()
+
 
 # aliases
 S = Shortcut

@@ -2,25 +2,26 @@ import os
 import traceback
 from . import actions
 
+
 class App:
-    """ Class representing a host-side application, for which we have a set
-        of macro sequences. Project code was originally more complex and
-        this was helpful, but maybe it's excessive now?"""
+    """
+    Class representing a host-side application, for which we have a set
+    of macro sequences.
+    """
+
     def __init__(self, macro_keypad, appdata):
         self.macro_keypad = macro_keypad
-        self.name = appdata['name']
-        self.macros = appdata['macros']
+        self.name = appdata["name"]
+        self.macros = appdata["macros"]
         self._enter = None
-        if "enter" in appdata and callable(appdata['enter']):
-            self._enter = appdata['enter']
+        if "enter" in appdata and callable(appdata["enter"]):
+            self._enter = appdata["enter"]
         self._leave = None
-        if "leave" in appdata and callable(appdata['leave']):
-            self._leave = appdata['leave']
-
+        if "leave" in appdata and callable(appdata["leave"]):
+            self._leave = appdata["leave"]
 
     def switch(self, prev_app=None):
-        """ Activate application settings; update OLED labels and LED
-            colors. """
+        """Activate application settings."""
         # the previous app's "leave" custom code
         if prev_app and prev_app._leave:
             prev_app._leave(pad=self.macro_keypad, prev_app=prev_app, next_app=self)
@@ -29,7 +30,6 @@ class App:
         # the current app's "enter" custom code
         if self._enter:
             self._enter(pad=self.macro_keypad, prev_app=prev_app, next_app=self)
-
 
     def button_press(self, key_number):
         # the sequence is arbitrary-length
@@ -71,7 +71,6 @@ class App:
             else:
                 print("Unkown action", item)
 
-
     def button_release(self, key_number):
         sequence = self.macros[key_number][2]
         if not isinstance(sequence, (list, tuple)):
@@ -86,7 +85,6 @@ class App:
         self.macro_keypad.set_led(key_number, self.macros[key_number][0])
         self.macro_keypad.show_leds()
 
-
     def reset_leds(self):
         for pos, macro in enumerate(self.macros):
             self.macro_keypad.set_led(pos, macro[0])
@@ -97,11 +95,18 @@ def load_apps(macro_keypad, macro_folder):
     files = os.listdir(macro_folder)
     files.sort()
     for filename in files:
-        if filename.endswith('.py') and filename[0] != ".":
+        if filename.endswith(".py") and filename[0] != ".":
             try:
-                module = __import__(macro_folder + '/' + filename[:-3])
+                module = __import__(macro_folder + "/" + filename[:-3])
                 apps.append(App(macro_keypad, module.app))
-            except (SyntaxError, ImportError, AttributeError, KeyError, NameError,
-                    IndexError, TypeError) as err:
+            except (
+                SyntaxError,
+                ImportError,
+                AttributeError,
+                KeyError,
+                NameError,
+                IndexError,
+                TypeError,
+            ) as err:
                 traceback.print_exception(err, err, err.__traceback__)
     return apps
