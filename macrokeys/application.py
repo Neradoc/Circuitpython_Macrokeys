@@ -87,6 +87,11 @@ class App:
         self.macro_keypad.show_leds()
 
 
+    def reset_leds(self):
+        for pos, macro in enumerate(self.macros):
+            self.macro_keypad.set_led(pos, macro[0])
+
+
 def load_apps(macro_keypad, macro_folder):
     apps = []
     files = os.listdir(macro_folder)
