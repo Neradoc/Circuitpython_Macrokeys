@@ -270,6 +270,7 @@ class Mouse(MacroAction):
         self.y = y
         self.wheel = wheel
         self.neg = neg
+        super().__init__(button, x, y, wheel, neg=neg)
     def press(self):
         if self.button == 1:
             common_mouse.press(adafruit_hid.mouse.Mouse.LEFT_BUTTON)
