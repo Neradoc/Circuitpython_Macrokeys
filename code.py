@@ -18,7 +18,8 @@ from adafruit_display_shapes.rect import Rect
 from adafruit_display_text import label
 from adafruit_macropad import MacroPad
 
-from macrokeys import actions, application
+from macrokeys import actions
+from macrokeys.drivers.adafruit_macropad import MacroPadDriver
 
 
 # CONFIGURABLES ------------------------
@@ -31,10 +32,7 @@ macropad = MacroPad()
 macropad.display.auto_refresh = False
 macropad.pixels.auto_write = False
 
-def _play_tone(note, duration):
-    macropad.play_tone(note, duration)
-
-actions.play_tone = _play_tone
+macro_keypad = MacroPadDriver(macropad)
 
 # Set up displayio group with all the labels
 group = displayio.Group()
@@ -55,13 +53,31 @@ macropad.group = group
 
 # Load all the macro key setups from .py files in MACRO_FOLDER
 
-apps = application.load_apps(macropad, MACRO_FOLDER)
+apps = macro_keypad.load_apps(MACRO_FOLDER)
 
 if not apps:
     group[13].text = 'NO MACRO FILES FOUND'
     macropad.display.refresh()
     while True:
         pass
+
+@macro_keypad.on_switch
+def on_switch(prev_app, next_app):
+    macropad.group[13].text = next_app.name   # Application name
+    for i in range(12):
+        if i < len(next_app.macros): # Key in use, set label + LED color
+            macropad.pixels[i] = next_app.macros[i][0]
+            macropad.group[i].text = next_app.macros[i][1]
+        else:  # Key not in use, no label or LED
+            macropad.pixels[i] = 0
+            macropad.group[i].text = ''
+    macropad.keyboard.release_all()
+    macropad.consumer_control.release()
+    macropad.mouse.release_all()
+    macropad.stop_tone()
+    macropad.pixels.show()
+    macropad.display.refresh()
+
 
 # the last position being None makes the loop start with switching to a page
 last_position = None
@@ -102,6 +118,6 @@ while True:
 
     macros = apps[app_index].macros[key_number]
     if pressed:
-        application.button_press(macropad, key_number, macros)
+        macro_keypad.button_press(key_number, macros)
     else:
-        application.button_release(macropad, key_number, macros)
+        macro_keypad.button_release(key_number, macros)

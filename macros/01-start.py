@@ -4,11 +4,11 @@ import time
 
 def onoff(pad, key, idx):
     # pad.display.brightness = 0
-    pad.group.hidden = not pad.group.hidden
-    pad.display.refresh()
-    if pad.group.hidden:
-        pad.pixels.fill(0)
-        pad.pixels.show()
+    pad.backend.group.hidden = not pad.group.hidden
+    pad.backend.display.refresh()
+    if pad.backend.group.hidden:
+        pad.fill_leds(0)
+        pad.show_leds()
 
 beep = Tone(("C6", 0.08), 0.05, ("E6", 0.10))
 
@@ -16,8 +16,8 @@ def entering(pad, prev_app, next_app):
     beep.action()
 
 def leaving(pad, prev_app, next_app):
-    pad.group.hidden = False
-    pad.display.refresh()
+    pad.backend.group.hidden = False
+    pad.backend.display.refresh()
 
 app = {                    # REQUIRED dict, must be named 'app'
     'name' : 'Test Macros', # Application name
