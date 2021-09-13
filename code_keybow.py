@@ -1,13 +1,3 @@
-"""
-A fairly straightforward macro/hotkey program for Adafruit MACROPAD.
-Macro key setups are stored in the /macros folder (configurable below),
-load up just the ones you're likely to use. Plug into computer's USB port,
-use dial to select an application macro set, press MACROPAD keys to send
-key sequences.
-"""
-
-# pylint: disable=import-error, unused-import, too-few-public-methods
-
 import board
 from digitalio import DigitalInOut, Pull
 import gc

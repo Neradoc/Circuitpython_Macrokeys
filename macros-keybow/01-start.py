@@ -10,7 +10,6 @@ def onoff(app, key, idx):
         app.macro_keypad.night_mode = True
     else:
         app.reset_leds()
-        print("TODO: REFESH PAD COLORS")
 
 def leaving(pad, prev_app, next_app):
     pad.night_mode = False
