@@ -16,10 +16,9 @@ class KeybowDriver(KeypadBase):
             return num_to_col(incol)
         if isinstance(incol, (tuple, list)) and len(incol) == 3:
             return incol
-        raise ValueError("Wrong color value")
+        raise ValueError(f"Wrong color value: {repr(incol)}")
 
     def set_led(self, pos, color):
-        print(pos, color, self.colors(color))
         self.backend.keys[pos].set_led(*self.colors(color))
 
     def fill_leds(self, color):

@@ -106,6 +106,7 @@ while True:
     if position != last_position:
         prev_app_index = app_index
         app_index = position % len(apps)
+        print(f"Switching to page {app_index}")
         apps[app_index].switch(apps[prev_app_index])
         last_position = position
 
