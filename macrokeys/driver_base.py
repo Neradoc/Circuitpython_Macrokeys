@@ -5,9 +5,12 @@ from .application import App
 
 
 class KeypadBase:
-    def __init__(self, backend):
+    def __init__(self, backend, pixels=None, play_tone=None):
         self.backend = backend
         self.night_mode = False
+        self.pixels = pixels
+        if play_tone:
+            actions.play_tone = play_tone
         self._on_switch = None
 
     @property
@@ -15,16 +18,26 @@ class KeypadBase:
         return actions.common_keyboard
 
     def play_tone(self, note, duration):
-        pass
+        if self.play_tone:
+            return self.play_tone(note, duration)
 
-    def set_led(self, pos, value):
-        pass
+    def set_led(self, pos, color):
+        try:
+            self.pixels[pos] = color
+        except:
+            pass
 
     def show_leds(self):
-        pass
+        try:
+            self.pixels.show()
+        except:
+            pass
 
     def fill_leds(self, color):
-        pass
+        try:
+            self.pixels.fill(color)
+        except:
+            pass
 
     def on_switch(self, callback):
         self._on_switch = callback
