@@ -51,21 +51,9 @@ if not apps:
         keybow.set_all(255, 0, 0)
         time.sleep(1)
 
-
-@macro_keypad.on_switch
-def on_switch(prev_app, next_app):
-    for i in range(16):
-        if i < len(next_app.macros):  # Key in use, set label + LED color
-            macro_keypad.set_led(i, next_app.macros[i][0])
-        else:  # Key not in use, no label or LED
-            macro_keypad.set_led(i, 0)
-
-
-# the last position being None makes the loop start with switching to a page
+# init the first app
 app_index = 0
-
-# init colors
-apps[app_index].reset_leds()
+apps[app_index].switch(None)
 
 # MAIN LOOP ----------------------------
 
@@ -83,17 +71,14 @@ for key in keybow.keys:
 
 while True:
     gc.collect()
-    keybow.update()
     boot.update()
     if boot.rose:
         if boot.last_duration > 2:
-            macro_keypad.night_mode = not macro_keypad.night_mode
-            if macro_keypad.night_mode:
-                keybow.set_all(0, 0, 0)
-            else:
-                apps[app_index].reset_leds()
+            apps[app_index].toggle_night_mode(True)
         else:
             prev_app_index = app_index
             app_index = (app_index + 1) % len(apps)
             print(f"Switching to page {app_index}")
             apps[app_index].switch(apps[prev_app_index])
+    else:
+        keybow.update()

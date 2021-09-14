@@ -3,17 +3,10 @@ from macrokeys import *
 import time
 
 def onoff(app, key, idx):
-    # app.macro_keypad.display.brightness = 0
-    if not app.macro_keypad.night_mode:
-        app.macro_keypad.fill_leds(0)
-        app.macro_keypad.show_leds()
-        app.macro_keypad.night_mode = True
-    else:
-        app.reset_leds()
+    app.toggle_night_mode()
 
 def leaving(pad, prev_app, next_app):
-    pad.night_mode = False
-    next_app.reset_leds()
+    next_app.toggle_night_mode(False)
 
 app = {                    # REQUIRED dict, must be named 'app'
     'name' : 'Test Macros', # Application name

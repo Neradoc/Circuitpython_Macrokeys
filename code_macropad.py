@@ -70,10 +70,10 @@ def on_switch(prev_app, next_app):
     macropad.group[13].text = next_app.name  # Application name
     for i in range(12):
         if i < len(next_app.macros):  # Key in use, set label + LED color
-            macropad.pixels[i] = next_app.macros[i][0]
+            macropad.pixels[i] = next_app.macros[i][0]  # not necessary
             macropad.group[i].text = next_app.macros[i][1]
         else:  # Key not in use, no label or LED
-            macropad.pixels[i] = 0
+            macropad.pixels[i] = 0  # not necessary
             macropad.group[i].text = ""
     macropad.keyboard.release_all()
     macropad.consumer_control.release()
@@ -84,9 +84,9 @@ def on_switch(prev_app, next_app):
 
 
 # the last position being None makes the loop start with switching to a page
-last_position = None
+last_position = macropad.encoder
 app_index = 0
-
+apps[app_index].switch(None)
 
 # MAIN LOOP ----------------------------
 

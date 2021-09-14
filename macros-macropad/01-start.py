@@ -3,14 +3,9 @@ from macrokeys import *
 import time
 
 def onoff(app, key, idx):
-    app.macro_keypad.night_mode = not app.macro_keypad.night_mode
-    app.macro_keypad.backend.group.hidden = app.macro_keypad.night_mode
+    app.toggle_night_mode()
+    app.macro_keypad.backend.group.hidden = app.night_mode
     app.macro_keypad.backend.display.refresh()
-    if app.macro_keypad.night_mode:
-        app.macro_keypad.fill_leds(0)
-        app.macro_keypad.show_leds()
-    else:
-        app.reset_leds()
 
 beep = Tone(("C6", 0.08), 0.05, ("E6", 0.10))
 
@@ -18,8 +13,12 @@ def entering(pad, prev_app, next_app):
     beep.action()
 
 def leaving(pad, prev_app, next_app):
+    next_app.toggle_night_mode(False)
     pad.backend.group.hidden = False
     pad.backend.display.refresh()
+
+def die(*argv, **kwargv):
+    raise OSError("Testing Exceptions")
 
 app = {                    # REQUIRED dict, must be named 'app'
     'name' : 'Test Macros', # Application name
@@ -30,7 +29,7 @@ app = {                    # REQUIRED dict, must be named 'app'
         # 1st row ----------
         (0x202000, 'Click', Mouse(1)),
         (0x202000, 'wheel-', Mouse(wheel=-10)),
-        (0x202000, 'wheel+', Mouse(wheel=10)),
+        (0x202000, 'Die', die),
         # 2nd row ----------
         (0x202000, 'V-', Control("VOLUME_DECREMENT")),
         (0x202000, 'V+', Control("VOLUME_INCREMENT")),

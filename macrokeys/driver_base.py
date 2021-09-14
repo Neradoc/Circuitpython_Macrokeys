@@ -7,7 +7,6 @@ from .application import App
 class KeypadBase:
     def __init__(self, backend, pixels=None, play_tone=None):
         self.backend = backend
-        self.night_mode = False
         self.pixels = pixels
         if play_tone:
             actions.play_tone = play_tone
@@ -39,6 +38,12 @@ class KeypadBase:
         except:
             pass
 
+    def set_leds(self, colors):
+        for i, col in enumerate(colors):
+            if col is not None:
+                self.set_led(i, col)
+
+    # use as a decorator
     def on_switch(self, callback):
         self._on_switch = callback
 
