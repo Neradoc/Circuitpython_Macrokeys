@@ -1,10 +1,12 @@
 from ..driver_base import KeypadBase
 
 class MacroPadDriver(KeypadBase):
-    def __init__(self, backend):
+    def __init__(self, macropad):
+        macropad.display.auto_refresh = False
+        macropad.pixels.auto_write = False
         super().__init__(
-            backend=backend,
-            play_tone=backend.play_tone
+            backend=macropad,
+            play_tone=macropad.play_tone
         )
 
     def play_tone(self, note, duration):

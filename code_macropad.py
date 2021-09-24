@@ -19,9 +19,6 @@ MACRO_FOLDER = "/macros-macropad"
 # INITIALIZATION -----------------------
 
 macropad = MacroPad()
-macropad.display.auto_refresh = False
-macropad.pixels.auto_write = False
-
 macro_keypad = MacroPadDriver(macropad)
 
 # Set up displayio group with all the labels
