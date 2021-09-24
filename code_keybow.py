@@ -42,18 +42,7 @@ def colors_rolling():
 
 # Load all the macro key setups from .py files in MACRO_FOLDER
 
-apps = application.load_apps(macro_keypad, MACRO_FOLDER)
-
-if not apps:
-    while True:
-        keybow.set_all(0, 0, 0)
-        time.sleep(1)
-        keybow.set_all(255, 0, 0)
-        time.sleep(1)
-
-# init the first app
-app_index = 0
-apps[app_index].switch(None)
+main_app = application(macro_keypad, MACRO_FOLDER)
 
 # MAIN LOOP ----------------------------
 
@@ -62,11 +51,11 @@ for key in keybow.keys:
 
     @keybow.on_press(key)
     def press_handler(key):
-        apps[app_index].button_press(key.number)
+        main_app.current.button_press(key.number)
 
     @keybow.on_release(key)
     def release_handler(key):
-        apps[app_index].button_release(key.number)
+        main_app.current.button_release(key.number)
 
 
 while True:
@@ -74,11 +63,9 @@ while True:
     boot.update()
     if boot.rose:
         if boot.last_duration > 2:
-            apps[app_index].toggle_night_mode(True)
+            main_app.toggle_night_mode(True)
         else:
-            prev_app_index = app_index
-            app_index = (app_index + 1) % len(apps)
-            print(f"Switching to page {app_index}")
-            apps[app_index].switch(apps[prev_app_index])
+            print(f"Switching to next page")
+            main_app.move_page(1)
     else:
         keybow.update()

@@ -3,7 +3,7 @@ import traceback
 from . import actions
 
 
-class App:
+class MacrosPage:
     """
     Class representing a host-side application, for which we have a set
     of macro sequences.
@@ -11,17 +11,17 @@ class App:
     fidget_mode = False
     night_mode = False
 
-    def __init__(self, macro_keypad, appdata):
+    def __init__(self, macro_keypad, page_data):
         self.macro_keypad = macro_keypad
-        self.name = appdata["name"]
-        self.macros = appdata["macros"]
+        self.name = page_data["name"]
+        self.macros = page_data["macros"]
         self.colors = [item[0] for item in self.macros]
         self._enter = None
-        if "enter" in appdata and callable(appdata["enter"]):
-            self._enter = appdata["enter"]
+        if "enter" in page_data and callable(page_data["enter"]):
+            self._enter = page_data["enter"]
         self._leave = None
-        if "leave" in appdata and callable(appdata["leave"]):
-            self._leave = appdata["leave"]
+        if "leave" in page_data and callable(page_data["leave"]):
+            self._leave = page_data["leave"]
 
     def switch(self, prev_app=None):
         """Activate application settings."""
@@ -105,24 +105,35 @@ class App:
             self.macro_keypad.set_leds(self.colors)
         self.macro_keypad.show_leds()
 
+class Application:
+    def __init__(self, macro_keypad, macro_folder):
+        self.pages = []
+        self.index = 0
+        files = os.listdir(macro_folder)
+        files.sort()
+        for filename in files:
+            if filename.endswith(".py") and filename[0] != ".":
+                try:
+                    module = __import__(macro_folder + "/" + filename[:-3])
+                    self.pages.append(MacrosPage(macro_keypad, module.app))
+                except (
+                    SyntaxError,
+                    ImportError,
+                    AttributeError,
+                    KeyError,
+                    NameError,
+                    IndexError,
+                    TypeError,
+                ) as err:
+                    traceback.print_exception(err, err, err.__traceback__)
+        if not self.pages:
+            raise ValueError("No macros found")
 
-def load_apps(macro_keypad, macro_folder):
-    apps = []
-    files = os.listdir(macro_folder)
-    files.sort()
-    for filename in files:
-        if filename.endswith(".py") and filename[0] != ".":
-            try:
-                module = __import__(macro_folder + "/" + filename[:-3])
-                apps.append(App(macro_keypad, module.app))
-            except (
-                SyntaxError,
-                ImportError,
-                AttributeError,
-                KeyError,
-                NameError,
-                IndexError,
-                TypeError,
-            ) as err:
-                traceback.print_exception(err, err, err.__traceback__)
-    return apps
+    @property
+    def current(self):
+        return self.pages[self.index]
+
+    def move_page(self, delta):
+        last_page = self.pages[self.index]
+        self.index = (self.index + delta) % len(self.pages)
+        self.pages[self.index].switch(last_page)
