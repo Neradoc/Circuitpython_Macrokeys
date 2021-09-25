@@ -217,7 +217,7 @@ class KeypadBase:
         if self.night_mode:
             self.fill_leds(0)
         else:
-            self.set_leds(self.colors)
+            self.set_leds(self.current.colors)
         self.show_leds()
 
     ####################################################################
