@@ -322,11 +322,6 @@ class Tone(MacroAction):
     def release(self):
         pass
 
-    @staticmethod
-    def set_player(callback):
-        global play_tone
-        play_tone = callback
-
 
 class Mouse(MacroAction):
     """
@@ -368,9 +363,10 @@ class Play(MacroAction):
         for file in files:
             for path in [AUDIO_FILE_PATH, "", "/"]:
                 file_path = path + "/" + file
-                file_path = file_path.replace("//","/")
+                file_path = file_path.replace("//", "/")
                 try:
-                    with open(file_path, "r"): pass
+                    with open(file_path, "r"):
+                        pass
                     break
                 except:
                     pass
@@ -386,8 +382,3 @@ class Play(MacroAction):
 
     def release(self):
         pass
-
-    @staticmethod
-    def set_player(callback):
-        global play_file
-        play_file = callback

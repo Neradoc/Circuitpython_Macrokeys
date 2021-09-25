@@ -8,9 +8,7 @@ from adafruit_display_shapes.rect import Rect
 from adafruit_display_text import label
 from adafruit_macropad import MacroPad
 
-from macrokeys import actions, application
 from macrokeys.drivers.adafruit_macropad import MacroPadDriver
-
 
 # CONFIGURABLES ------------------------
 

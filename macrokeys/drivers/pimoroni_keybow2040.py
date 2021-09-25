@@ -1,4 +1,3 @@
-from .. import actions
 from ..driver_base import KeypadBase
 
 
