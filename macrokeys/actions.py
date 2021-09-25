@@ -16,6 +16,8 @@ play_tone = None
 play_file = None
 
 # config in macros_config.py
+
+AUDIO_FILE_PATH = "/audio"
 RELEASE_DELAY = 0.02
 
 BASE_NOTES_MIDI = {"C": 24, "D": 26, "E": 28, "F": 29, "G": 31, "A": 33, "B": 35}
@@ -46,6 +48,9 @@ try:
         layout = _macros_config.default_layout(common_keyboard)
     if hasattr(_macros_config, "RELEASE_DELAY"):
         RELEASE_DELAY = _macros_config.RELEASE_DELAY
+    if hasattr(_macros_config, "AUDIO_FILE_PATH"):
+        AUDIO_FILE_PATH = _macros_config.AUDIO_FILE_PATH
+
 except ImportError:
     pass
 
@@ -356,10 +361,16 @@ class Mouse(MacroAction):
 class Play(MacroAction):
     def __init__(self, *files, neg=False):
         for file in files:
-            try:
-                with open(file, "r"):
+            for path in [AUDIO_FILE_PATH, "", "/"]:
+                file_path = path + "/" + file
+                file_path = file_path.replace("//","/")
+                try:
+                    with open(file_path, "r"): pass
+                    break
+                except:
                     pass
-            except:
+            else:
+                # for/else: no break means no file found
                 raise ValueError(f"Unkown file {file}")
         super().__init__(*files, neg=neg)
 
