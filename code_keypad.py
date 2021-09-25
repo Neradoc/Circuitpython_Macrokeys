@@ -25,22 +25,14 @@ boot_pin.switch_to_input(Pull.UP)
 boot = Debouncer(boot_pin)
 
 # ######################################
-
-macro_keypad = KeypadModuleDriver(keypad_keys)
-
-# ######################################
 # Load all the macro key setups from .py files in MACRO_FOLDER
 
-apps = application.load_apps(macro_keypad, MACRO_FOLDER)
+macro_keypad = KeypadModuleDriver(keypad_keys, macro_folder=MACRO_FOLDER)
 
-if not apps:
-	raise ValueError("Not apps!")
-
-# the last position being None makes the loop start with switching to a page
-app_index = 0
+# ######################################
 
 # init colors
-apps[app_index].reset_leds()
+macro_keypad.current.reset_leds()
 
 # MAIN LOOP ----------------------------
 
@@ -48,9 +40,7 @@ while True:
     gc.collect()
     boot.update()
     if boot.rose:
-        prev_app_index = app_index
-        app_index = (app_index + 1) % len(apps)
-        print(f"Switching to page {app_index}")
-        apps[app_index].switch(apps[prev_app_index])
+        print(f"Switching to next page")
+        macro_keypad.move_page(1)
     else:
-        macro_keypad.do_macro(apps[app_index])
+        macro_keypad.do_macro()

@@ -18,4 +18,3 @@ class KeypadModuleDriver(KeypadBase):
                 app.button_press(key_number)
             else:
                 app.button_release(key_number)
-
