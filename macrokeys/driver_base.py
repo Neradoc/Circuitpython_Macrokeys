@@ -29,7 +29,7 @@ class MacrosPage:
         return len(self.macros)
 
     def switch(self, prev_app=None):
-        """Activate application settings."""
+        """Activate a page settings."""
         # the previous app's "leave" custom code
         if prev_app and prev_app._leave:
             prev_app._leave(pad=self.macro_keypad, prev_app=prev_app, next_app=self)
@@ -38,7 +38,7 @@ class MacrosPage:
             self.macro_keypad.set_leds(self.colors)
         # do the switch
         self.macro_keypad.do_switch(prev_app, self)
-        # the current app's "enter" custom code
+        # the current page's "enter" custom code
         if self._enter:
             self._enter(pad=self.macro_keypad, prev_app=prev_app, next_app=self)
 
