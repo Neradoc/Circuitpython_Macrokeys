@@ -7,11 +7,15 @@ MACRO_FOLDER = "/macros"
 
 
 class KeypadBase:
-    def __init__(self, backend, macro_folder=None, pixels=None, play_tone=None):
+    def __init__(
+        self, backend, macro_folder=None, pixels=None, play_tone=None, play_file=None
+    ):
         self.backend = backend
         self.pixels = pixels
         if play_tone:
             actions.play_tone = play_tone
+        if play_file:
+            actions.play_file = play_file
         self._on_switch = None
         self.init_macros(macro_folder or MACRO_FOLDER)
 

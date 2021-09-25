@@ -13,6 +13,7 @@ common_mouse = adafruit_hid.mouse.Mouse(usb_hid.devices)
 common_keyboard = Keyboard(usb_hid.devices)
 common_control = ConsumerControl(usb_hid.devices)
 play_tone = None
+play_file = None
 
 # config in macros_config.py
 RELEASE_DELAY = 0.02
@@ -352,8 +353,20 @@ class Mouse(MacroAction):
         self.release()
 
 
-# aliases
-S = Shortcut
-C = Control
-T = Type
-M = Midi
+class Play(MacroAction):
+    def __init__(self, *files, neg=False):
+        for file in files:
+            try:
+                with open(file, "r"):
+                    pass
+            except:
+                raise ValueError(f"Unkown file {file}")
+        super().__init__(*files, neg=neg)
+
+    def press(self):
+        for file in self.actions:
+            if callable(play_file):
+                play_file(file)
+
+    def release(self):
+        pass

@@ -9,6 +9,7 @@ class MacroPadDriver(KeypadBase):
             backend=macropad,
             macro_folder=macro_folder,
             play_tone=macropad.play_tone,
+            play_file=macropad.play_file,
         )
 
     def play_tone(self, note, duration):
