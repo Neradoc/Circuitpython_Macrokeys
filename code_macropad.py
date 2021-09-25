@@ -19,7 +19,6 @@ MACRO_FOLDER = "/macros-macropad"
 # INITIALIZATION -----------------------
 
 macropad = MacroPad()
-macro_keypad = MacroPadDriver(macropad)
 
 # Set up displayio group with all the labels
 group = displayio.Group()
@@ -53,13 +52,7 @@ macropad.group = group
 
 # Load all the macro key setups from .py files in MACRO_FOLDER
 
-apps = application.load_apps(macro_keypad, MACRO_FOLDER)
-
-if not apps:
-    group[13].text = "NO MACRO FILES FOUND"
-    macropad.display.refresh()
-    while True:
-        pass
+macro_keypad = MacroPadDriver(macropad, macro_folder=MACRO_FOLDER)
 
 
 @macro_keypad.on_switch
@@ -82,19 +75,17 @@ def on_switch(prev_app, next_app):
 
 # the last position being None makes the loop start with switching to a page
 last_position = macropad.encoder
-app_index = 0
-apps[app_index].switch(None)
+macro_keypad.start()
 
 # MAIN LOOP ----------------------------
 
 while True:
     # Read encoder position. If it's changed, switch apps.
+    
     position = macropad.encoder
     if position != last_position:
-        prev_app_index = app_index
-        app_index = position % len(apps)
-        print(f"Switching to page {app_index}")
-        apps[app_index].switch(apps[prev_app_index])
+        print(f"Switching page by {last_position - position}")
+        macro_keypad.move_page(last_position - position)
         last_position = position
 
     # Handle encoder button. If state has changed, and if there's a
@@ -103,13 +94,13 @@ while True:
     macropad.encoder_switch_debounced.update()
     encoder_switch_pressed = macropad.encoder_switch_debounced.pressed
     if encoder_switch_pressed:
-        if len(apps[app_index].macros) < 13:
+        if macro_keypad.macro_count < 13:
             continue  # No 13th macro, just resume main loop
         key_number = 12  # else process below as 13th macro
         pressed = True
     else:
         event = macropad.keys.events.get()
-        if not event or event.key_number >= len(apps[app_index].macros):
+        if not event or event.key_number >= macro_keypad.macro_count:
             continue  # No key events, or no corresponding macro, resume loop
         key_number = event.key_number
         pressed = event.pressed
@@ -119,6 +110,6 @@ while True:
     # are avoided by 'continue' statements above which resume the loop.
 
     if pressed:
-        apps[app_index].button_press(key_number)
+        macro_keypad.current.button_press(key_number)
     else:
-        apps[app_index].button_release(key_number)
+        macro_keypad.current.button_release(key_number)

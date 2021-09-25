@@ -7,8 +7,8 @@ def num_to_col(c):
 
 
 class KeybowDriver(KeypadBase):
-    def __init__(self, backend):
-        super().__init__(backend)
+    def __init__(self, backend, macro_folder=None):
+        super().__init__(backend, macro_folder)
         self.night_mode = False
 
     def colors(self, incol):

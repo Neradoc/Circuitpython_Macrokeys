@@ -23,6 +23,10 @@ class MacrosPage:
         if "leave" in page_data and callable(page_data["leave"]):
             self._leave = page_data["leave"]
 
+    @property
+    def macro_count(self):
+        return len(self.macros)
+
     def switch(self, prev_app=None):
         """Activate application settings."""
         # the previous app's "leave" custom code
@@ -104,36 +108,3 @@ class MacrosPage:
         else:
             self.macro_keypad.set_leds(self.colors)
         self.macro_keypad.show_leds()
-
-class Application:
-    def __init__(self, macro_keypad, macro_folder):
-        self.pages = []
-        self.index = 0
-        files = os.listdir(macro_folder)
-        files.sort()
-        for filename in files:
-            if filename.endswith(".py") and filename[0] != ".":
-                try:
-                    module = __import__(macro_folder + "/" + filename[:-3])
-                    self.pages.append(MacrosPage(macro_keypad, module.app))
-                except (
-                    SyntaxError,
-                    ImportError,
-                    AttributeError,
-                    KeyError,
-                    NameError,
-                    IndexError,
-                    TypeError,
-                ) as err:
-                    traceback.print_exception(err, err, err.__traceback__)
-        if not self.pages:
-            raise ValueError("No macros found")
-
-    @property
-    def current(self):
-        return self.pages[self.index]
-
-    def move_page(self, delta):
-        last_page = self.pages[self.index]
-        self.index = (self.index + delta) % len(self.pages)
-        self.pages[self.index].switch(last_page)

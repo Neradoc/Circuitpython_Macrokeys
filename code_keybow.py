@@ -19,17 +19,19 @@ MACRO_FOLDER = "/macros-keybow"
 
 i2c = board.I2C()
 keybow = Keybow2040(i2c)
-macro_keypad = KeybowDriver(keybow)
 
 boot_pin = DigitalInOut(board.USER_SW)
 boot_pin.switch_to_input(Pull.UP)
 boot = Debouncer(boot_pin)
 
+# Load all the macro key setups from .py files in MACRO_FOLDER
+
+macro_keypad = KeybowDriver(keybow, MACRO_FOLDER)
+
 # ######################################
 
 col_index = 230
 keycolors = [0] * 16
-
 
 def colors_rolling():
     global col_index
@@ -40,10 +42,6 @@ def colors_rolling():
     col_index = col_index + 1
 
 
-# Load all the macro key setups from .py files in MACRO_FOLDER
-
-main_app = application(macro_keypad, MACRO_FOLDER)
-
 # MAIN LOOP ----------------------------
 
 # Attach handler functions to all of the keys
@@ -51,11 +49,11 @@ for key in keybow.keys:
 
     @keybow.on_press(key)
     def press_handler(key):
-        main_app.current.button_press(key.number)
+        macro_keypad.current.button_press(key.number)
 
     @keybow.on_release(key)
     def release_handler(key):
-        main_app.current.button_release(key.number)
+        macro_keypad.current.button_release(key.number)
 
 
 while True:
@@ -63,9 +61,9 @@ while True:
     boot.update()
     if boot.rose:
         if boot.last_duration > 2:
-            main_app.toggle_night_mode(True)
+            macro_keypad.toggle_night_mode(True)
         else:
             print(f"Switching to next page")
-            main_app.move_page(1)
+            macro_keypad.move_page(1)
     else:
         keybow.update()

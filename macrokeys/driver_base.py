@@ -1,16 +1,18 @@
 import os
 import traceback
 from . import actions
-from .application import App
+from .application import MacrosPage
 
+MACRO_FOLDER = "/macros"
 
-class KeypadBase:
-    def __init__(self, backend, pixels=None, play_tone=None):
+class KeypadBase():
+    def __init__(self, backend, macro_folder=None, pixels=None, play_tone=None):
         self.backend = backend
         self.pixels = pixels
         if play_tone:
             actions.play_tone = play_tone
         self._on_switch = None
+        self.init_macros(macro_folder or MACRO_FOLDER)
 
     @property
     def keyboard(self):
@@ -50,3 +52,48 @@ class KeypadBase:
     def do_switch(self, prev_app, next_app):
         if callable(self._on_switch):
             self._on_switch(prev_app, next_app)
+
+    def start(self):
+        self.move_page(0)
+
+    # this is the application part
+
+    def init_macros(self, macro_folder):
+        self.pages = []
+        self.index = 0
+        files = os.listdir(macro_folder)
+        files.sort()
+        for filename in files:
+            if filename.endswith(".py") and filename[0] != ".":
+                try:
+                    module = __import__(macro_folder + "/" + filename[:-3])
+                    self.pages.append(MacrosPage(self, module.app))
+                except (
+                    SyntaxError,
+                    ImportError,
+                    AttributeError,
+                    KeyError,
+                    NameError,
+                    IndexError,
+                    TypeError,
+                ) as err:
+                    traceback.print_exception(err, err, err.__traceback__)
+        if not self.pages:
+            raise ValueError("No macros found")
+
+    @property
+    def current(self):
+        return self.pages[self.index]
+
+    @property
+    def page_count(self):
+        return len(self.pages)
+
+    @property
+    def macro_count(self):
+        return self.pages[self.index].macro_count
+
+    def move_page(self, delta):
+        last_page = self.pages[self.index]
+        self.index = (self.index + delta) % len(self.pages)
+        self.pages[self.index].switch(last_page)
