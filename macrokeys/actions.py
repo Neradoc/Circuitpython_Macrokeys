@@ -322,6 +322,11 @@ class Tone(MacroAction):
     def release(self):
         pass
 
+    @staticmethod
+    def set_player(callback):
+        global play_tone
+        play_tone = callback
+
 
 class Mouse(MacroAction):
     """
@@ -381,3 +386,8 @@ class Play(MacroAction):
 
     def release(self):
         pass
+
+    @staticmethod
+    def set_player(callback):
+        global play_file
+        play_file = callback

@@ -13,9 +13,9 @@ class KeypadBase:
         self.backend = backend
         self.pixels = pixels
         if play_tone:
-            actions.play_tone = play_tone
+            actions.Tone.set_player(play_tone)
         if play_file:
-            actions.play_file = play_file
+            actions.Play.set_player(play_file)
         self._on_switch = None
         self.init_macros(macro_folder or MACRO_FOLDER)
 
