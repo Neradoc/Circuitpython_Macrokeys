@@ -8,6 +8,7 @@ class MacrosPage:
     Class representing a host-side application, for which we have a set
     of macro sequences.
     """
+
     fidget_mode = False
     night_mode = False
 

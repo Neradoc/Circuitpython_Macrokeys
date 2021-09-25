@@ -1,6 +1,7 @@
 from .. import actions
 from ..driver_base import KeypadBase
 
+
 class KeypadModuleDriver(KeypadBase):
     def __init__(self, backend, macro_folder=None, pixels=None, play_tone=None):
         super().__init__(

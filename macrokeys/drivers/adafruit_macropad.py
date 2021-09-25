@@ -1,5 +1,6 @@
 from ..driver_base import KeypadBase
 
+
 class MacroPadDriver(KeypadBase):
     def __init__(self, macropad, macro_folder=None):
         macropad.display.auto_refresh = False

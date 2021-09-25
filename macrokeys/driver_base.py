@@ -5,7 +5,8 @@ from .application import MacrosPage
 
 MACRO_FOLDER = "/macros"
 
-class KeypadBase():
+
+class KeypadBase:
     def __init__(self, backend, macro_folder=None, pixels=None, play_tone=None):
         self.backend = backend
         self.pixels = pixels
