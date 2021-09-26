@@ -70,6 +70,10 @@ def on_switch(prev_app, next_app):
     macropad.pixels.show()
     macropad.display.refresh()
 
+@macro_keypad.on_night_mode
+def on_night_mode(pad):
+    macropad.group.hidden = pad.night_mode
+    macropad.display.refresh()
 
 # the last position being None makes the loop start with switching to a page
 last_position = macropad.encoder

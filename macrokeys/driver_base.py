@@ -62,9 +62,9 @@ class MacrosPage:
             if item == 0:
                 for item in sequence:
                     if isinstance(item, actions.MacroAction):
-                        item.release()
+                        item.release(self.macro_keypad)
             elif isinstance(item, actions.MacroAction):
-                item.action()
+                item.action(self.macro_keypad)
             elif isinstance(item, float):
                 time.sleep(item)
             elif isinstance(item, actions.Color):
@@ -93,7 +93,7 @@ class MacrosPage:
         # Release any still-pressed keys
         for item in sequence:
             if isinstance(item, actions.MacroAction):
-                item.release()
+                item.release(self.macro_keypad)
             # compatibility
             if isinstance(item, int) and item >= 0:
                 self.macro_keypad.keyboard.release(item)
@@ -119,11 +119,14 @@ class KeypadBase:
         self.night_mode = False
         self.backend = backend
         self.pixels = pixels
+        # features
         if play_tone:
             actions.play_tone = play_tone
         if play_file:
             actions.play_file = play_file
         self._on_switch = None
+        self._on_night_mode = None
+        # init
         self.init_macros(macro_folder or MACRO_FOLDER)
 
     ####################################################################
@@ -155,6 +158,27 @@ class KeypadBase:
             self._on_switch(prev_app, next_app)
 
     ####################################################################
+    # switch modes and values
+    ####################################################################
+
+    def toggle_night_mode(self, value=None):
+        """
+        Set night mode to True or False.
+        Toggle LEDs on or of based on the value.
+        """
+        if isinstance(value, bool):
+            self.night_mode = value
+        else:
+            self.night_mode = not self.night_mode
+        if self.night_mode:
+            self.fill_leds(0)
+        else:
+            self.set_leds(self.current.colors)
+        self.show_leds()
+        if self._on_night_mode:
+            self._on_night_mode(self)
+
+    ####################################################################
     # setup callbacks and features, can be used as decorators
     ####################################################################
 
@@ -169,6 +193,9 @@ class KeypadBase:
     def on_switch(self, callback):
         """Setup the switch callback, called after every switch."""
         self._on_switch = callback
+
+    def on_night_mode(self, callback):
+        self._on_night_mode = callback
 
     ####################################################################
     # LED methods
@@ -200,25 +227,6 @@ class KeypadBase:
         for i, col in enumerate(colors):
             if col is not None:
                 self.set_led(i, col)
-
-    ####################################################################
-    # switch modes and values
-    ####################################################################
-
-    def toggle_night_mode(self, value=None):
-        """
-        Set night mode to True or False.
-        Toggle LEDs on or of based on the value.
-        """
-        if isinstance(value, bool):
-            self.night_mode = value
-        else:
-            self.night_mode = not self.night_mode
-        if self.night_mode:
-            self.fill_leds(0)
-        else:
-            self.set_leds(self.current.colors)
-        self.show_leds()
 
     ####################################################################
     # this is the macros pages part

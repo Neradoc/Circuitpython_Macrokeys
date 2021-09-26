@@ -117,22 +117,22 @@ class MacroAction:
         self.actions = actions
         self.neg = neg
 
-    def press(self):
+    def press(self, pad=None):
         raise NotImplementedError("MacroAction must be subclassed to press()")
 
-    def release(self):
+    def release(self, pad=None):
         raise NotImplementedError("MacroAction must be subclassed to release()")
 
-    def action(self):
+    def action(self, pad=None):
         if self.neg:
-            self.release()
+            self.release(pad)
         else:
-            self.press()
+            self.press(pad)
 
-    def send(self):
-        self.press()
+    def send(self, pad=None):
+        self.press(pad)
         time.sleep(RELEASE_DELAY)
-        self.release()
+        self.release(pad)
 
     def __neg__(self):
         return self.__class__(*self.actions, neg=not self.neg)
@@ -165,13 +165,13 @@ class Shortcut(MacroAction):
                 raise ValueError("Bad type of Shortcut action:" + repr(action))
         super().__init__(*acts, neg=neg)
 
-    def press(self):
+    def press(self, pad=None):
         common_keyboard.press(*self.actions)
 
-    def release(self):
+    def release(self, pad=None):
         common_keyboard.release(*self.actions)
 
-    def send(self):
+    def send(self, pad=None):
         common_keyboard.send(*self.actions)
 
 
@@ -189,13 +189,13 @@ class Control(MacroAction):
             raise ValueError("Bad type of Control action:" + repr(action))
         super().__init__(code, neg=neg)
 
-    def press(self):
+    def press(self, pad=None):
         common_control.press(*self.actions)
 
-    def release(self):
+    def release(self, pad=None):
         common_control.release()  # only one key at a time anyway
 
-    def send(self):
+    def send(self, pad=None):
         common_control.send(*self.actions)
 
 
@@ -219,15 +219,15 @@ class Midi(MacroAction):
             acts.append((note, velocity))
         super().__init__(*acts, neg=neg)
 
-    def press(self):
+    def press(self, pad=None):
         for note, velocity in self.actions:
             self.midi.send(NoteOn(note, velocity))
 
-    def release(self):
+    def release(self, pad=None):
         for note, velocity in self.actions:
             self.midi.send(NoteOff(note, 0))
 
-    def send(self):
+    def send(self, pad=None):
         self.press()
         time.sleep(RELEASE_DELAY)
         self.release()
@@ -242,14 +242,14 @@ class Type(MacroAction):
     def __init__(self, *actions, neg=False):
         super().__init__(*actions, neg=neg)
 
-    def press(self):
+    def press(self, pad=None):
         for action in self.actions:
             layout.write(action)
 
-    def release(self):
+    def release(self, pad=None):
         pass
 
-    def send(self):
+    def send(self, pad=None):
         self.press()
 
     @staticmethod
@@ -311,7 +311,7 @@ class Tone(MacroAction):
             acts.append((note, duration))
         super().__init__(*acts, neg=neg)
 
-    def press(self):
+    def press(self, pad=None):
         for note, duration in self.actions:
             if note > 0:
                 if callable(play_tone):
@@ -319,7 +319,7 @@ class Tone(MacroAction):
             else:
                 time.sleep(duration)
 
-    def release(self):
+    def release(self, pad=None):
         pass
 
 
@@ -336,7 +336,7 @@ class Mouse(MacroAction):
         self.neg = neg
         super().__init__(button, x, y, wheel, neg=neg)
 
-    def press(self):
+    def press(self, pad=None):
         if self.button == 1:
             common_mouse.press(adafruit_hid.mouse.Mouse.LEFT_BUTTON)
         elif self.button == 2:
@@ -345,7 +345,7 @@ class Mouse(MacroAction):
             common_mouse.press(adafruit_hid.mouse.Mouse.MIDDLE_BUTTON)
         common_mouse.move(self.x, self.y, self.wheel)
 
-    def release(self):
+    def release(self, pad=None):
         if self.button == 1:
             common_mouse.release(adafruit_hid.mouse.Mouse.LEFT_BUTTON)
         elif self.button == 2:
@@ -353,7 +353,7 @@ class Mouse(MacroAction):
         elif self.button == 3:
             common_mouse.release(adafruit_hid.mouse.Mouse.MIDDLE_BUTTON)
 
-    def send(self):
+    def send(self, pad=None):
         self.press()
         self.release()
 
@@ -375,10 +375,27 @@ class Play(MacroAction):
                 raise ValueError(f"Unkown file {file}")
         super().__init__(*files, neg=neg)
 
-    def press(self):
+    def press(self, pad=None):
         for file in self.actions:
             if callable(play_file):
                 play_file(file)
 
-    def release(self):
+    def release(self, pad=None):
         pass
+
+class Night(MacroAction):
+    def __init__(self, toggle=False, neg=False):
+        self.toggle = toggle
+        super().__init__(neg=neg)
+
+    def press(self, pad):
+        if self.toggle:
+            pad.toggle_night_mode()
+        else:
+            pad.toggle_night_mode(not self.neg)
+
+    def release(self, pad=None):
+        pass
+
+def NightToggle():
+    return Night(toggle = True)

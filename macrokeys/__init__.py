@@ -5,6 +5,8 @@ from .actions import (
     Control,
     Midi,
     Mouse,
+    Night,
+    NightToggle,
     Shortcut,
     Play,
     Tone,

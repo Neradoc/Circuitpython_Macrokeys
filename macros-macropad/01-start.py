@@ -2,18 +2,13 @@
 from macrokeys import *
 import time
 
-def onoff(app, key, idx):
-    app.toggle_night_mode()
-    app.macro_keypad.backend.group.hidden = app.night_mode
-    app.macro_keypad.backend.display.refresh()
-
 beep = Tone(("C6", 0.08), 0.05, ("E6", 0.10))
 
 def entering(pad, prev_app, next_app):
     beep.action()
 
 def leaving(pad, prev_app, next_app):
-    next_app.toggle_night_mode(False)
+    pad.toggle_night_mode(False)
     pad.backend.group.hidden = False
     pad.backend.display.refresh()
 
@@ -41,11 +36,7 @@ app = {                    # REQUIRED dict, must be named 'app'
                 Tone( ("A5", 0.5) ),
             ]
         ),
-        (0x202000, 'Tadah', Tone(
-            ("A5", 0.2), 0.2,
-            ("B5", 0.2), ("C6", 0.2), 0.2,
-            ("D6", 0.2), ("D#6", 0.2)
-        ) ),
+        (0x202000, 'Honk', Play("/audio/honk.wav") ),
         (0x202000, 'Arpg', Tone(
             ("C6", 0.2), ("E6", 0.2), ("G6", 0.2), ("C7", 0.2),
             ("G6", 0.2), ("E6", 0.2), ("C6", 0.5),
@@ -55,6 +46,6 @@ app = {                    # REQUIRED dict, must be named 'app'
         (0x800000, 'M', [ "hello", 0x30 ]),
         (0x101010, 'Hello', Type("Hello 123")),
         # Encoder button ---
-        (0x000000, '', onoff)
+        (0x000000, '', NightToggle())
     ],
 }
