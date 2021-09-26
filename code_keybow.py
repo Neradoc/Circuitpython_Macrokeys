@@ -7,7 +7,7 @@ import traceback
 
 from rainbowio import colorwheel
 from adafruit_debouncer import Debouncer
-from macrokeys import actions, application
+
 from macrokeys.drivers.pimoroni_keybow2040 import KeybowDriver
 from keybow2040 import Keybow2040
 
@@ -24,26 +24,6 @@ boot_pin = DigitalInOut(board.USER_SW)
 boot_pin.switch_to_input(Pull.UP)
 boot = Debouncer(boot_pin)
 
-# Load all the macro key setups from .py files in MACRO_FOLDER
-
-macro_keypad = KeybowDriver(keybow, MACRO_FOLDER)
-
-# ######################################
-
-col_index = 230
-keycolors = [0] * 16
-
-def colors_rolling():
-    global col_index
-    for x in range(16):
-        keycolors[x] = num_to_col(colorwheel((3 * x + col_index) % 256))
-        if not macro_keypad.night_mode:
-            macro_keypad.set_led(x, keycolors[x])
-    col_index = col_index + 1
-
-
-# MAIN LOOP ----------------------------
-
 # Attach handler functions to all of the keys
 for key in keybow.keys:
 
@@ -55,6 +35,12 @@ for key in keybow.keys:
     def release_handler(key):
         macro_keypad.current.button_release(key.number)
 
+# Load all the macro key setups from .py files in MACRO_FOLDER
+
+macro_keypad = KeybowDriver(keybow, MACRO_FOLDER)
+macro_keypad.start()
+
+# MAIN LOOP ----------------------------
 
 while True:
     gc.collect()

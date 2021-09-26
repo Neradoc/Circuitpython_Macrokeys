@@ -2,27 +2,21 @@
 from macrokeys import *
 import time
 
-def onoff(app, key, idx):
-    app.toggle_night_mode()
-
-def leaving(pad, prev_app, next_app):
-    next_app.toggle_night_mode(False)
-
 app = {                    # REQUIRED dict, must be named 'app'
     'name' : 'Test Macros', # Application name
-    'leave' : leaving,
+    'leave' : -Night(),
     'macros' : [           # List of button macros...
         # COLOR    LABEL    KEY SEQUENCE
         # 1st row ----------
         (0x202000, 'Click', Mouse(1)),
         (0x202000, 'wheel-', Mouse(wheel=-10)),
         (0x202000, 'wheel+', Mouse(wheel=10)),
-        (0x000000, '', onoff),
+        (0x000000, '', NightToggle()),
         # 2nd row ----------
         (0x202000, 'V-', Control("VOLUME_DECREMENT")),
         (0x202000, 'V+', Control("VOLUME_INCREMENT")),
         (0x202000, 'Calc', Control(0x192)),
-        (0x000000, '', onoff),
+        (0x000000, '', NightToggle()),
         # 3rd row ----------
         (0x202000, 'Beep',
             [
@@ -39,11 +33,11 @@ app = {                    # REQUIRED dict, must be named 'app'
             ("C6", 0.2), ("E6", 0.2), ("G6", 0.2), ("C7", 0.2),
             ("G6", 0.2), ("E6", 0.2), ("C6", 0.5),
         ) ),
-        (0x000000, '', onoff),
+        (0x000000, '', NightToggle()),
         # 4th row ----------
         (0x101010, 'a', Shortcut("A")),
         (0x800000, 'M', [ "hello", 0x30 ]),
         (0x101010, 'Hello', Type("Hello 123")),
-        (0x000000, '', onoff),
+        (0x000000, 'Night', NightToggle()),
     ],
 }
