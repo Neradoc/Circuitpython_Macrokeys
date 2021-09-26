@@ -234,6 +234,11 @@ class KeypadBase:
             if col is not None:
                 self.set_led(i, col)
 
+    def reset_leds(self):
+        """Set the colors of each LED to the ones defined in the current page"""
+        if not self.night_mode:
+            self.set_leds(self.current.colors)
+
     ####################################################################
     # this is the macros pages part
     ####################################################################
@@ -265,10 +270,6 @@ class KeypadBase:
         if not self.pages:
             raise ValueError("No macros found")
 
-    def start(self):
-        """Start the macrokeys application."""
-        self.move_page(0)
-
     @property
     def current(self):
         """The current page."""
@@ -284,7 +285,11 @@ class KeypadBase:
         """The number of macros on the page."""
         return self.pages[self.index].macro_count
 
-    def move_page(self, delta):
+    def start(self):
+        """Start the macrokeys application."""
+        self.move_page(0)
+
+    def move_page(self, delta=1):
         """
         Change from one page to the other.
         Call the page's switch method.

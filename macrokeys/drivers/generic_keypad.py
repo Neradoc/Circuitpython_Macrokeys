@@ -10,11 +10,11 @@ class KeypadModuleDriver(KeypadBase):
             play_tone=play_tone,
         )
 
-    def do_macro(self, app):
+    def update_keys(self):
         event = self.backend.events.get()
         if event:
             key_number = event.key_number
             if event.pressed:
-                app.button_press(key_number)
+                self.current.button_press(key_number)
             else:
-                app.button_release(key_number)
+                self.current.button_release(key_number)
