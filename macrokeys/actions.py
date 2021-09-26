@@ -118,10 +118,10 @@ class MacroAction:
         self.neg = neg
 
     def press(self, pad=None):
-        raise NotImplementedError("MacroAction must be subclassed to press()")
+        pass
 
     def release(self, pad=None):
-        raise NotImplementedError("MacroAction must be subclassed to release()")
+        pass
 
     def action(self, pad=None):
         if self.neg:
@@ -232,9 +232,9 @@ class Midi(MacroAction):
             self.midi.send(NoteOff(note, 0))
 
     def send(self, pad=None):
-        self.press()
+        self.press(pad)
         time.sleep(RELEASE_DELAY)
-        self.release()
+        self.release(pad)
 
 
 class Type(MacroAction):
@@ -250,11 +250,8 @@ class Type(MacroAction):
         for action in self.actions:
             layout.write(action)
 
-    def release(self, pad=None):
-        pass
-
     def send(self, pad=None):
-        self.press()
+        self.press(pad)
 
     @staticmethod
     def write(text):
@@ -323,9 +320,6 @@ class Tone(MacroAction):
             else:
                 time.sleep(duration)
 
-    def release(self, pad=None):
-        pass
-
 
 class Mouse(MacroAction):
     """
@@ -358,8 +352,8 @@ class Mouse(MacroAction):
             common_mouse.release(adafruit_hid.mouse.Mouse.MIDDLE_BUTTON)
 
     def send(self, pad=None):
-        self.press()
-        self.release()
+        self.press(pad)
+        self.release(pad)
 
 
 class Play(MacroAction):
@@ -384,8 +378,6 @@ class Play(MacroAction):
             if callable(play_file):
                 play_file(file)
 
-    def release(self, pad=None):
-        pass
 
 class Night(MacroAction):
     def __init__(self, toggle=False, neg=False):
@@ -398,8 +390,6 @@ class Night(MacroAction):
         else:
             pad.toggle_night_mode(not self.neg)
 
-    def release(self, pad=None):
-        pass
 
 def NightToggle():
     return Night(toggle = True)
