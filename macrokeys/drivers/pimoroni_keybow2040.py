@@ -1,11 +1,11 @@
-from ..driver_base import KeypadBase
+from ..controller import ControlPad
 
 
 def num_to_col(c):
     return (c >> 16 & 0xFF, c >> 8 & 0xFF, c & 0xFF)
 
 
-class KeybowDriver(KeypadBase):
+class KeybowDriver(ControlPad):
     def __init__(self, backend, macro_folder=None):
         super().__init__(backend, macro_folder)
         self.night_mode = False

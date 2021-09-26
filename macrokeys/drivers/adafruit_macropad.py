@@ -1,7 +1,7 @@
-from ..driver_base import KeypadBase
+from ..controller import ControlPad
 
 
-class MacroPadDriver(KeypadBase):
+class MacroPadDriver(ControlPad):
     def __init__(self, macropad, macro_folder=None):
         macropad.display.auto_refresh = False
         macropad.pixels.auto_write = False

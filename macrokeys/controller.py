@@ -49,14 +49,22 @@ class MacrosPage:
                 self._enter(pad=self.macro_keypad, prev_app=prev_app, next_app=self)
 
     def button_press(self, key_number):
-        """Do an action based on the pressed button or key."""
-        # the sequence is arbitrary-length
-        # each item in the sequence is either
-        # an action instance or a floating point value
-        # Action   ==>  execute the action
-        # Float    ==>  sleep in seconds
-        # Function ==>  call it with context
-        sequence = self.macros[key_number][2]
+        """
+        Do an action based on the pressed button or key.
+        
+        The sequence is arbitrary-length.
+        Each item in the sequence can be of different types:
+        Action   ==>  execute the action
+        Float    ==>  sleep in seconds
+        Color    ==>  change the color of the button
+        Function ==>  call it with context
+        int      ==>  Keycode, for compatibility
+        str      ==>  type with the actions layout, for compatibility
+        """
+        try:
+            sequence = self.macros[key_number][2]
+        except IndexError:
+            return
         if not isinstance(sequence, (list, tuple)):
             sequence = (sequence,)
         # light the matching LED
@@ -93,7 +101,10 @@ class MacrosPage:
 
     def button_release(self, key_number):
         """Do things when the button/key is released."""
-        sequence = self.macros[key_number][2]
+        try:
+            sequence = self.macros[key_number][2]
+        except IndexError:
+            return
         if not isinstance(sequence, (list, tuple)):
             sequence = (sequence,)
         # Release any still-pressed keys
@@ -113,11 +124,11 @@ class MacrosPage:
 
 
 ####################################################################
-# Keypad base, handles all the things
+# ControlPad base, handles all the things
 ####################################################################
 
 
-class KeypadBase:
+class ControlPad:
     def __init__(
         self, backend, macro_folder=None, pixels=None, play_tone=None, play_file=None
     ):

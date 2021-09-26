@@ -1,7 +1,7 @@
-from ..driver_base import KeypadBase
+from ..controller import ControlPad
 
 
-class KeypadModuleDriver(KeypadBase):
+class KeypadModuleDriver(ControlPad):
     def __init__(self, backend, macro_folder=None, pixels=None, play_tone=None):
         super().__init__(
             backend,
