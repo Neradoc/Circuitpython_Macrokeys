@@ -17,10 +17,10 @@ class MacrosPage:
         self.macros = page_data["macros"]
         self.colors = [item[0] for item in self.macros]
         self._enter = None
-        if "enter" in page_data and callable(page_data["enter"]):
+        if "enter" in page_data:
             self._enter = page_data["enter"]
         self._leave = None
-        if "leave" in page_data and callable(page_data["leave"]):
+        if "leave" in page_data:
             self._leave = page_data["leave"]
 
     @property
@@ -32,7 +32,10 @@ class MacrosPage:
         """Activate a page settings."""
         # the previous app's "leave" custom code
         if prev_app and prev_app._leave:
-            prev_app._leave(pad=self.macro_keypad, prev_app=prev_app, next_app=self)
+            if isinstance(prev_app._leave, actions.MacroAction):
+                prev_app._leave.action(self.macro_keypad)
+            elif callable(prev_app._leave):
+                prev_app._leave(pad=self.macro_keypad, prev_app=prev_app, next_app=self)
         # set the LEDs
         if not self.macro_keypad.night_mode:
             self.macro_keypad.set_leds(self.colors)
@@ -40,7 +43,10 @@ class MacrosPage:
         self.macro_keypad.do_switch(prev_app, self)
         # the current page's "enter" custom code
         if self._enter:
-            self._enter(pad=self.macro_keypad, prev_app=prev_app, next_app=self)
+            if isinstance(self._enter, actions.MacroAction):
+                self._enter.action(self.macro_keypad)
+            elif callable(self._enter):
+                self._enter(pad=self.macro_keypad, prev_app=prev_app, next_app=self)
 
     def button_press(self, key_number):
         """Do an action based on the pressed button or key."""

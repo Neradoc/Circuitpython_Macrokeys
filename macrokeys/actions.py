@@ -138,7 +138,11 @@ class MacroAction:
         return self.__class__(*self.actions, neg=not self.neg)
 
     def __repr__(self):
-        return ("-" if self.neg else "+") + repr(self.actions)
+        return (
+            ("-" if self.neg else "+")
+            + self.__class__.__name__
+            + repr(self.actions)
+        )
 
 
 class Shortcut(MacroAction):
@@ -386,9 +390,9 @@ class Play(MacroAction):
 class Night(MacroAction):
     def __init__(self, toggle=False, neg=False):
         self.toggle = toggle
-        super().__init__(neg=neg)
+        super().__init__(toggle, neg=neg)
 
-    def press(self, pad):
+    def action(self, pad):
         if self.toggle:
             pad.toggle_night_mode()
         else:

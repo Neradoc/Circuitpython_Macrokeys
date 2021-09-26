@@ -2,23 +2,13 @@
 from macrokeys import *
 import time
 
-beep = Tone(("C6", 0.08), 0.05, ("E6", 0.10))
-
-def entering(pad, prev_app, next_app):
-    beep.action()
-
-def leaving(pad, prev_app, next_app):
-    pad.toggle_night_mode(False)
-    pad.backend.group.hidden = False
-    pad.backend.display.refresh()
-
 def die(*argv, **kwargv):
     raise OSError("Testing Exceptions")
 
 app = {                    # REQUIRED dict, must be named 'app'
     'name' : 'Test Macros', # Application name
-    'enter' : entering,
-    'leave' : leaving,
+    'enter' : Tone(("C6", 0.08), 0.05, ("E6", 0.10)),
+    'leave' : -Night(),
     'macros' : [           # List of button macros...
         # COLOR    LABEL    KEY SEQUENCE
         # 1st row ----------
