@@ -130,11 +130,10 @@ class MacrosPage:
 
 class ControlPad:
     def __init__(
-        self, backend, macro_folder=None, pixels=None, play_tone=None, play_file=None
+        self, macro_folder=None, pixels=None, play_tone=None, play_file=None
     ):
         self.fidget_mode = False
         self.night_mode = False
-        self.backend = backend
         self.pixels = pixels
         # features
         if play_tone:
@@ -307,4 +306,12 @@ class ControlPad:
         """
         last_page = self.pages[self.index]
         self.index = (self.index + delta) % len(self.pages)
+        self.pages[self.index].switch(last_page)
+
+    def goto_page(self, page=0):
+        """
+        Go to page N.
+        """
+        last_page = self.pages[self.index]
+        self.index = page % len(self.pages)
         self.pages[self.index].switch(last_page)

@@ -6,8 +6,9 @@ def num_to_col(c):
 
 
 class KeybowDriver(ControlPad):
-    def __init__(self, backend, macro_folder=None):
-        super().__init__(backend, macro_folder)
+    def __init__(self, keybow, macro_folder=None):
+        super().__init__(macro_folder)
+        self.keybow = keybow
         self.night_mode = False
 
     def colors(self, incol):
@@ -18,7 +19,7 @@ class KeybowDriver(ControlPad):
         raise ValueError(f"Wrong color value: {repr(incol)}")
 
     def set_led(self, pos, color):
-        self.backend.keys[pos].set_led(*self.colors(color))
+        self.keybow.keys[pos].set_led(*self.colors(color))
 
     def fill_leds(self, color):
-        self.backend.set_all(*self.colors(color))
+        self.keybow.set_all(*self.colors(color))

@@ -4,11 +4,11 @@ from ..controller import ControlPad
 class KeypadModuleDriver(ControlPad):
     def __init__(self, backend, macro_folder=None, pixels=None, play_tone=None):
         super().__init__(
-            backend,
             macro_folder=macro_folder,
             pixels=pixels,
             play_tone=play_tone,
         )
+        self.backend = backend
 
     def update_keys(self):
         event = self.backend.events.get()
