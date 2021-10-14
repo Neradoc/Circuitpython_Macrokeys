@@ -81,9 +81,9 @@ loading_group.append(loading_label)
 # different sized screens.
 layout = GridLayout(
     x=0,
-    y=0,
+    y=20,
     width=280,
-    height=240,
+    height=220,
     grid_size=(GRID_COL_NUM, 3),
     cell_padding=0,
 )
@@ -95,7 +95,7 @@ _icons = []
 layer_label = bitmap_label.Label(terminalio.FONT)
 layer_label.anchor_point = (0.5, 0.0)
 layer_label.anchored_position = (display.width // 2 - 20, 0)
-# main_group.append(layer_label)
+main_group.append(layer_label)
 
 SIDE_BUTTON_BB = (40, 72)
 # NOTE: anchor_point ne fonctionne pas (bounding_box is 0000)
@@ -127,9 +127,11 @@ gc.collect()
 #####################################################################
 # setup a driver class
 
-class TonePlayer:
-    def __init__(self, backend):
-        self.backend = backend
+class AudioPlayer:
+    def __init__(self):
+        self._speaker_enable = DigitalInOut(board.SPEAKER_ENABLE)
+        self._speaker_enable.switch_to_output(False)
+        self.audio = audioio.AudioOut(board.SPEAKER)
 
     @staticmethod
     def _sine_sample(length):
@@ -152,33 +154,47 @@ class TonePlayer:
 
     def start_tone(self, frequency):
         """From adafruit_macropad."""
-        self.backend.peripherals._speaker_enable.value = True
+        self._speaker_enable.value = True
         length = 100
         if length * frequency > 350000:
             length = 350000 // frequency
         self._generate_sample(length)
         # Start playing a tone of the specified frequency (hz).
         self._sine_wave_sample.sample_rate = int(len(self._sine_wave) * frequency)
-        if not self.backend.peripherals.audio.playing:
-            self.backend.peripherals.audio.play(self._sine_wave_sample, loop=True)
+        if not self.audio.playing:
+            self.audio.play(self._sine_wave_sample, loop=True)
 
     def stop_tone(self):
         """From adafruit_macropad."""
         # Stop playing any tones.
-        if self.backend.peripherals.audio.playing:
-            self.backend.peripherals.audio.stop()
-        self.backend.peripherals._speaker_enable.value = False
+        if self.audio.playing:
+            self.audio.stop()
+        self._speaker_enable.value = False
+
+    def play_file(self, file_name, wait_to_finish=True):
+        """Play a wav file."""
+        self.audio.stop()
+        wavfile = open(file_name, "rb")
+        wavedata = audiocore.WaveFile(wavfile)
+        self._speaker_enable.value = True
+        self.audio.play(wavedata)
+        if not wait_to_finish:
+            return
+        while self.audio.playing:
+            pass
+        wavfile.close()
+        self._speaker_enable.value = False
 
 class PyPortalDriver(controller.ControlPad):
 
     def __init__(self, pyportal, macro_folder=None):
         self.pyportal = pyportal
-        self.touch = touchscreen # pyportal.peripherals.touchscreen
-        # self.player = TonePlayer(pyportal)
+        self.touch = touchscreen
+        self.player = AudioPlayer()
         super().__init__(
             macro_folder=macro_folder,
-            # play_tone=self.player.play_tone,
-            # play_file=pyportal.peripherals.play_file,
+            play_tone=self.player.play_tone,
+            play_file=self.player.play_file,
         )
 
     def update_press(self):
@@ -254,11 +270,13 @@ def switch_page(prev_app, next_app):
         print(icon_path)
         try:
             s = os.stat(icon_path)
+            texte = ""
         except OSError:
-            icon_path = f"/touch_deck_icons/td_white.bmp"
+            icon_path = f"/touch_deck_icons/td_white_bar.bmp"
+            texte = macro[1]
 
         # create an icon for the current shortcut
-        _new_icon = IconWidget(macro[1], icon_path, on_disk=True)
+        _new_icon = IconWidget(texte, icon_path, on_disk=True)
         # add it to the list of icons
         _icons.append(_new_icon)
 
