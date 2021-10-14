@@ -1,6 +1,5 @@
 # MACROPAD Hotkeys example: Universal Numpad
 from macrokeys import *
-import time
 
 app = {                    # REQUIRED dict, must be named 'app'
     'name' : 'Test Macros', # Application name

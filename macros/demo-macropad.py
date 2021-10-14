@@ -1,6 +1,5 @@
 # MACROPAD Hotkeys example: Universal Numpad
 from macrokeys import *
-import time
 
 def die(*argv, **kwargv):
     raise OSError("Testing Exceptions")
