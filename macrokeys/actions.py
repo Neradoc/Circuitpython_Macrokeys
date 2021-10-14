@@ -1,9 +1,5 @@
 import time
 import usb_hid
-import usb_midi
-from adafruit_midi import MIDI
-from adafruit_midi.note_off import NoteOff
-from adafruit_midi.note_on import NoteOn
 from adafruit_hid.consumer_control import ConsumerControl
 from adafruit_hid.consumer_control_code import ConsumerControlCode
 from adafruit_hid.keyboard import Keyboard
@@ -63,6 +59,20 @@ if not layout:
 
     layout = keyboard_layout_us.KeyboardLayoutUS(common_keyboard)
 
+#####################################################################
+# setup midi
+#####################################################################
+
+try:
+    import usb_midi
+    from adafruit_midi import MIDI
+    from adafruit_midi.note_off import NoteOff
+    from adafruit_midi.note_on import NoteOn
+    MIDI_ENABLED = True
+except:
+    print("Midi unavailable, install adafruit_midi")
+    MIDI_ENABLED = False
+
 
 def note_to_midi(code):
     if isinstance(code, str):
@@ -106,6 +116,11 @@ def note_to_frequency(code):
     return code
 
 
+#####################################################################
+# Main action class
+#####################################################################
+
+
 class MacroAction:
     """
     Parent action class.
@@ -143,6 +158,11 @@ class MacroAction:
             + self.__class__.__name__
             + repr(self.actions)
         )
+
+
+#####################################################################
+# Actions subclasses
+#####################################################################
 
 
 class Shortcut(MacroAction):
@@ -211,6 +231,8 @@ class Midi(MacroAction):
     midi = MIDI(midi_out=usb_midi.ports[1], out_channel=0)
 
     def __init__(self, *actions, neg=False):
+        if not MIDI_ENABLED:
+            raise OSError("Midi is not enabled or adafruit_midi is missing")
         acts = []
         for data in actions:
             velocity = 127
@@ -357,6 +379,10 @@ class Mouse(MacroAction):
 
 
 class Play(MacroAction):
+    """
+    Action to play an audio file.
+    """
+
     def __init__(self, *files, neg=False):
         for file in files:
             for path in [AUDIO_FILE_PATH, "", "/"]:
@@ -370,7 +396,8 @@ class Play(MacroAction):
                     pass
             else:
                 # for/else: no break means no file found
-                raise ValueError(f"Unkown file {file}")
+                # raise ValueError(f"Unkown file {file}")
+                print(f"Unkown file {file}")
         super().__init__(*files, neg=neg)
 
     def press(self, pad=None):
@@ -380,6 +407,10 @@ class Play(MacroAction):
 
 
 class Night(MacroAction):
+    """
+    Action to set the night mode to a certain value, or toggle.
+    """
+
     def __init__(self, toggle=False, neg=False):
         self.toggle = toggle
         super().__init__(toggle, neg=neg)
@@ -392,4 +423,5 @@ class Night(MacroAction):
 
 
 def NightToggle():
+    """Shortcut to Night(toggle=True)."""
     return Night(toggle = True)
