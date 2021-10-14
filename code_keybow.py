@@ -13,7 +13,7 @@ from keybow2040 import Keybow2040
 
 # CONFIGURABLES ------------------------
 
-MACRO_FOLDER = "/macros-keybow"
+MACRO_FOLDER = "/macros"
 
 # INITIALIZATION -----------------------
 

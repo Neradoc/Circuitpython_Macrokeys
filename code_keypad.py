@@ -7,12 +7,11 @@ import time
 import traceback
 
 from adafruit_debouncer import Debouncer
-from macrokeys import actions, application
 from macrokeys.drivers.generic_keypad import KeypadModuleDriver
 
 # CONFIGURABLES ------------------------
 
-MACRO_FOLDER = "/macros-keypad"
+MACRO_FOLDER = "/macros"
 
 # INITIALIZATION -----------------------
 

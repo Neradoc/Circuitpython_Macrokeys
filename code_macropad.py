@@ -12,7 +12,7 @@ from macrokeys.drivers.adafruit_macropad import MacroPadDriver
 
 # CONFIGURABLES ------------------------
 
-MACRO_FOLDER = "/macros-macropad"
+MACRO_FOLDER = "/macros"
 
 # INITIALIZATION -----------------------
 
