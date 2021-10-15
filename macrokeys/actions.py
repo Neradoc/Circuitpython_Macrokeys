@@ -144,11 +144,6 @@ class MacroAction:
         else:
             self.press(pad)
 
-    def send(self, pad=None):
-        self.press(pad)
-        time.sleep(RELEASE_DELAY)
-        self.release(pad)
-
     def __neg__(self):
         return self.__class__(*self.actions, neg=not self.neg)
 
@@ -195,9 +190,6 @@ class Shortcut(MacroAction):
     def release(self, pad=None):
         common_keyboard.release(*self.actions)
 
-    def send(self, pad=None):
-        common_keyboard.send(*self.actions)
-
 
 class Control(MacroAction):
     """
@@ -218,9 +210,6 @@ class Control(MacroAction):
 
     def release(self, pad=None):
         common_control.release()  # only one key at a time anyway
-
-    def send(self, pad=None):
-        common_control.send(*self.actions)
 
 
 class Midi(MacroAction):
@@ -253,11 +242,6 @@ class Midi(MacroAction):
         for note, velocity in self.actions:
             self.midi.send(NoteOff(note, 0))
 
-    def send(self, pad=None):
-        self.press(pad)
-        time.sleep(RELEASE_DELAY)
-        self.release(pad)
-
 
 class Type(MacroAction):
     """
@@ -271,9 +255,6 @@ class Type(MacroAction):
     def press(self, pad=None):
         for action in self.actions:
             layout.write(action)
-
-    def send(self, pad=None):
-        self.press(pad)
 
     @staticmethod
     def write(text):
@@ -373,10 +354,6 @@ class Mouse(MacroAction):
         elif self.button == 3:
             common_mouse.release(adafruit_hid.mouse.Mouse.MIDDLE_BUTTON)
 
-    def send(self, pad=None):
-        self.press(pad)
-        self.release(pad)
-
 
 class Play(MacroAction):
     """
@@ -425,3 +402,28 @@ class Night(MacroAction):
 def NightToggle():
     """Shortcut to Night(toggle=True)."""
     return Night(toggle = True)
+
+
+class Page(MacroAction):
+    """Switch to the given page number."""
+    def __init__(self, number=0, neg=False):
+        self.number = number
+        super().__init__(neg=neg)
+
+    def action(self, pad):
+        pad.goto_page(self.number)
+
+    @classmethod
+    def next(pad, key, idx):
+        """Move to next page."""
+        pad.move_page(1)
+
+    @classmethod
+    def prev(pad, key, idx):
+        """Move to previous page."""
+        pad.move_page(-1)
+
+    @classmethod
+    def home(pad, key, idx):
+        """Move to home page."""
+        pad.move_page(0)

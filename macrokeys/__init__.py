@@ -7,8 +7,9 @@ from .actions import (
     Mouse,
     Night,
     NightToggle,
-    Shortcut,
+    Page,
     Play,
+    Shortcut,
     Tone,
     Type,
 )
