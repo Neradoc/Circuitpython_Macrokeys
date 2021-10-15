@@ -1,0 +1,10 @@
+adafruit_debouncer
+adafruit_hid
+adafruit_midi
+
+# adafruit_macropad
+# keybow2040
+# adafruit_display_shapes
+# adafruit_display_text
+# adafruit_displayio_layout
+# adafruit_touchscreen
