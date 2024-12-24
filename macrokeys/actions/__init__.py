@@ -65,9 +65,14 @@ if not layout:
 
 try:
     import usb_midi
+
+    if not usb_midi.ports:
+        raise Exception("MIDI not enabled")
+
     from adafruit_midi import MIDI
     from adafruit_midi.note_off import NoteOff
     from adafruit_midi.note_on import NoteOn
+
     MIDI_ENABLED = True
 except:
     print("Midi unavailable, install adafruit_midi")
@@ -148,11 +153,7 @@ class MacroAction:
         return self.__class__(*self.actions, neg=not self.neg)
 
     def __repr__(self):
-        return (
-            ("-" if self.neg else "+")
-            + self.__class__.__name__
-            + repr(self.actions)
-        )
+        return ("-" if self.neg else "+") + self.__class__.__name__ + repr(self.actions)
 
 
 #####################################################################
@@ -217,7 +218,7 @@ class Midi(MacroAction):
     Action to press/release a list of midi keys together.
     """
 
-    midi = MIDI(midi_out=usb_midi.ports[1], out_channel=0)
+    midi = None
 
     def __init__(self, *actions, neg=False):
         if not MIDI_ENABLED:
@@ -241,6 +242,10 @@ class Midi(MacroAction):
     def release(self, pad=None):
         for note, velocity in self.actions:
             self.midi.send(NoteOff(note, 0))
+
+
+if MIDI_ENABLED:
+    Midi.midi = MIDI(midi_out=usb_midi.ports[1], out_channel=0)
 
 
 class Type(MacroAction):
@@ -401,11 +406,12 @@ class Night(MacroAction):
 
 def NightToggle():
     """Shortcut to Night(toggle=True)."""
-    return Night(toggle = True)
+    return Night(toggle=True)
 
 
 class Page(MacroAction):
     """Switch to the given page number."""
+
     def __init__(self, number=0, neg=False):
         self.number = number
         super().__init__(neg=neg)
