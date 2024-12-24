@@ -137,9 +137,9 @@ class ControlPad:
         self.pixels = pixels
         # features
         if play_tone:
-            actions.play_tone = play_tone
+            actions.audio.play_tone = play_tone
         if play_file:
-            actions.play_file = play_file
+            actions.audio.play_file = play_file
         self._on_switch = None
         self._on_night_mode = None
         # init
@@ -160,13 +160,13 @@ class ControlPad:
 
     def play_tone(self, note, duration):
         """Play a tone if the play_tone function has been set."""
-        if actions.play_tone:
-            return actions.play_tone(note, duration)
+        if actions.audio.play_tone:
+            return actions.audio.play_tone(note, duration)
 
     def play_file(self, note, duration):
         """Play an audio file if the play_file function has been set."""
-        if actions.play_file:
-            return actions.play_file(note, duration)
+        if actions.audio.play_file:
+            return actions.audio.play_file(note, duration)
 
     def do_switch(self, prev_app, next_app):
         """Call the switch callback."""
@@ -200,11 +200,11 @@ class ControlPad:
 
     def tone_player(self, callback):
         """Setup the tone playing function."""
-        actions.play_tone = callback
+        actions.audio.play_tone = callback
 
     def file_player(self, callback):
         """Setup the audio file playing function."""
-        actions.play_file = callback
+        actions.audio.play_file = callback
 
     def on_switch(self, callback):
         """Setup the switch callback, called after every switch."""
