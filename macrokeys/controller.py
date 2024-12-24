@@ -95,7 +95,7 @@ class MacrosPage:
                     self.macro_keypad.keyboard.release(item)
             elif isinstance(item, str):
                 # compatibility
-                actions.layout.write(item)
+                actions.hid.layout.write(item)
             else:
                 print("Unkown action", item)
 
@@ -130,7 +130,7 @@ class MacrosPage:
 
 class ControlPad:
     def __init__(
-        self, macro_folder=None, pixels=None, play_tone=None, play_file=None
+        self, macro_folder=None, pixels=None, play_tone=None, play_file=None, actions_config=None
     ):
         self.fidget_mode = False
         self.night_mode = False
@@ -140,10 +140,12 @@ class ControlPad:
             actions.audio.play_tone = play_tone
         if play_file:
             actions.audio.play_file = play_file
+        self.macro_folder = macro_folder or MACRO_FOLDER
+        # actions config
+        self.user_config = actions_config or {}
+
         self._on_switch = None
         self._on_night_mode = None
-        # init
-        self.init_macros(macro_folder or MACRO_FOLDER)
 
     ####################################################################
     # access to properties
@@ -152,7 +154,7 @@ class ControlPad:
     @property
     def keyboard(self):
         """Access the keyboard instance."""
-        return actions.common_keyboard
+        return actions.hid.keyboard
 
     ####################################################################
     # features and callbacks
@@ -297,6 +299,11 @@ class ControlPad:
 
     def start(self):
         """Start the macrokeys application."""
+        # start / configure the actiosn based on user configuration
+        actions.hid_start(self.user_config)
+        actions.midi_start(self.user_config)
+        # init
+        self.init_macros(self.macro_folder)
         self.move_page(0)
 
     def move_page(self, delta=1):

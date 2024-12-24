@@ -5,56 +5,58 @@ from adafruit_hid.consumer_control_code import ConsumerControlCode
 from adafruit_hid.keyboard import Keyboard
 import adafruit_hid.mouse
 
-# config in macros_config.py
+mouse = None
+keyboard = None
+control = None
+keycodes = None
+layout = None
 
-RELEASE_DELAY = 0.02
 
+def hid_start(config):
+    """Configure the keyboards and other devices from the user config"""
+    global mouse, keyboard, control, keycodes, layout
 
-common_mouse = None
-common_keyboard = None
-common_control = None
+    hid = config.get("hid", None)
+    keycodes = config.get("keycodes", None)
+    layout_class = config.get("layout", None)
 
-common_keycodes = None
-common_layout = None
+    if hid is None:
+        try:
+            import macros_config as _macros_config
+            hid = _macros_config.default_hid
 
-try:
-    import macros_config as _macros_config
-    common_hid = _macros_config.default_hid
+        except (ImportError, AttributeError):
+            pass
 
-except (ImportError, AttributeError):
-    pass
+        try:
+            import usb_hid
+            hid = usb_hid
 
-try:
-    import usb_hid as common_hid
+        except ImportError:
+            pass
 
-    common_mouse = adafruit_hid.mouse.Mouse(common_hid.devices)
-    common_keyboard = Keyboard(common_hid.devices)
-    common_control = ConsumerControl(common_hid.devices)
+    # here hid should be defined, otherwise, we are not using shortcuts
+    if not hid:
+        return
 
-except ImportError:
-    pass
+    mouse = adafruit_hid.mouse.Mouse(hid.devices)
+    keyboard = Keyboard(hid.devices)
+    control = ConsumerControl(hid.devices)
 
-try:
-    import macros_config as _macros_config
+    # default US windows keycodes
+    if not keycodes:
+        from adafruit_hid import keycode
 
-    if hasattr(_macros_config, "default_keycode"):
-        common_keycodes = _macros_config.default_keycode
-    if hasattr(_macros_config, "default_layout"):
-        common_layout = _macros_config.default_layout(common_keyboard)
-    if hasattr(_macros_config, "RELEASE_DELAY"):
-        RELEASE_DELAY = _macros_config.RELEASE_DELAY
+        keycodes = keycode.Keycode
 
-except ImportError:
-    pass
+    # keyboard layout from config or default US windows layout
+    if layout_class:
+        layout = layout_class(keyboard)
+    else:
+        from adafruit_hid import keyboard_layout_us
 
-if not common_keycodes:
-    from adafruit_hid import keycode
+        layout = keyboard_layout_us.KeyboardLayoutUS(keyboard)
 
-    common_keycodes = keycode.Keycode
-if not common_layout:
-    from adafruit_hid import keyboard_layout_us
-
-    common_layout = keyboard_layout_us.KeyboardLayoutUS(common_keyboard)
 
 #####################################################################
 # Actions subclasses
@@ -75,20 +77,20 @@ class Shortcut(MacroAction):
             if isinstance(action, int):
                 acts.append(action)
             elif isinstance(action, str):
-                if hasattr(common_keycodes, action):
-                    code = getattr(common_keycodes, action)
+                if hasattr(keycodes, action):
+                    code = getattr(keycodes, action)
                     acts.append(code)
                 elif len(action) == 1:
-                    acts += common_layout.keycodes(action)
+                    acts += layout.keycodes(action)
             else:
                 raise ValueError("Bad type of Shortcut action:" + repr(action))
         super().__init__(*acts, neg=neg)
 
     def press(self, pad=None):
-        common_keyboard.press(*self.actions)
+        keyboard.press(*self.actions)
 
     def release(self, pad=None):
-        common_keyboard.release(*self.actions)
+        keyboard.release(*self.actions)
 
 
 class Type(MacroAction):
@@ -102,11 +104,11 @@ class Type(MacroAction):
 
     def press(self, pad=None):
         for action in self.actions:
-            common_layout.write(action)
+            layout.write(action)
 
     @staticmethod
     def write(text):
-        common_layout.write(text)
+        layout.write(text)
 
 
 class Control(MacroAction):
@@ -124,10 +126,10 @@ class Control(MacroAction):
         super().__init__(code, neg=neg)
 
     def press(self, pad=None):
-        common_control.press(*self.actions)
+        control.press(*self.actions)
 
     def release(self, pad=None):
-        common_control.release()  # only one key at a time anyway
+        control.release()  # only one key at a time anyway
 
 
 class Mouse(MacroAction):
@@ -145,17 +147,17 @@ class Mouse(MacroAction):
 
     def press(self, pad=None):
         if self.button == 1:
-            common_mouse.press(adafruit_hid.mouse.Mouse.LEFT_BUTTON)
+            mouse.press(adafruit_hid.mouse.Mouse.LEFT_BUTTON)
         elif self.button == 2:
-            common_mouse.press(adafruit_hid.mouse.Mouse.RIGHT_BUTTON)
+            mouse.press(adafruit_hid.mouse.Mouse.RIGHT_BUTTON)
         elif self.button == 3:
-            common_mouse.press(adafruit_hid.mouse.Mouse.MIDDLE_BUTTON)
-        common_mouse.move(self.x, self.y, self.wheel)
+            mouse.press(adafruit_hid.mouse.Mouse.MIDDLE_BUTTON)
+        mouse.move(self.x, self.y, self.wheel)
 
     def release(self, pad=None):
         if self.button == 1:
-            common_mouse.release(adafruit_hid.mouse.Mouse.LEFT_BUTTON)
+            mouse.release(adafruit_hid.mouse.Mouse.LEFT_BUTTON)
         elif self.button == 2:
-            common_mouse.release(adafruit_hid.mouse.Mouse.RIGHT_BUTTON)
+            mouse.release(adafruit_hid.mouse.Mouse.RIGHT_BUTTON)
         elif self.button == 3:
-            common_mouse.release(adafruit_hid.mouse.Mouse.MIDDLE_BUTTON)
+            mouse.release(adafruit_hid.mouse.Mouse.MIDDLE_BUTTON)

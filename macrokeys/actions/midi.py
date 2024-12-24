@@ -16,39 +16,57 @@ BASE_NOTES_FREQ = {
     "B": 493.88,
 }
 
-common_midi = None
+class Common:
+    midi_module = None
+    """The midi module: usb_midi or from midi BLE"""
+    midi = None
+    """The midi instance, instantiated from the other one"""
+    ENABLED = True
+    """If midi is enabled"""
 
-try:
-    import macros_config as _macros_config
-
-    if hasattr(_macros_config, "default_midi"):
-        common_midi = _macros_config.default_midi
-
-except ImportError:
-    pass
 
 #####################################################################
 # setup midi
 #####################################################################
 
 try:
-    # try importing adafruit_midi
     from adafruit_midi import MIDI
     from adafruit_midi.note_off import NoteOff
     from adafruit_midi.note_on import NoteOn
+except ImportError:
+    Common.ENABLED = False
+
+def midi_start(config):
+    """Configure the midi device from the user config"""
+
+    Common.midi_module = config.get("midi", None)
+
+    # adafruit_midi not even installed
+    if not Common.ENABLED:
+        return
+
+    # Common.midi defined (advanced)
+    if Common.midi is not None:
+        return
+
+    # midi user defined in configuration
+    if Common.midi_module:
+        Common.midi = MIDI(midi_out=Common.midi_module.ports[1], out_channel=0)
+        return
 
     # midi not externally defined (like you would with BLE) try USB
-    if not common_midi:
-        import usb_midi
-        if not usb_midi.ports:
-            raise Exception("MIDI not enabled")
+    if not Common.midi_module:
+        try:
+            import usb_midi
+            if not usb_midi.ports:
+                raise Exception("MIDI not enabled")
 
-        common_midi = MIDI(midi_out=usb_midi.ports[1], out_channel=0)
+            Common.midi_module = usb_midi
+            Common.midi = MIDI(midi_out=usb_midi.ports[1], out_channel=0)
 
-    MIDI_ENABLED = True
-except:
-    print("Midi unavailable, install adafruit_midi")
-    MIDI_ENABLED = False
+            Common.ENABLED = True
+        except:
+            Common.ENABLED = False
 
 
 def note_to_midi(code):
@@ -80,7 +98,7 @@ class Midi(MacroAction):
     """
 
     def __init__(self, *actions, neg=False):
-        if not MIDI_ENABLED:
+        if not Common.ENABLED:
             raise OSError("Midi is not enabled or adafruit_midi is missing")
         acts = []
         for data in actions:
@@ -96,9 +114,9 @@ class Midi(MacroAction):
 
     def press(self, pad=None):
         for note, velocity in self.actions:
-            common_midi.send(NoteOn(note, velocity))
+            Common.midi.send(NoteOn(note, velocity))
 
     def release(self, pad=None):
         for note, velocity in self.actions:
-            common_midi.send(NoteOff(note, 0))
+            Common.midi.send(NoteOff(note, 0))
 
