@@ -153,7 +153,11 @@ class MacroAction:
         return self.__class__(*self.actions, neg=not self.neg)
 
     def __repr__(self):
-        return ("-" if self.neg else "+") + self.__class__.__name__ + repr(self.actions)
+        return (
+            ("-" if self.neg else "+")
+            + self.__class__.__name__
+            + repr(self.actions)
+        )
 
 
 #####################################################################
@@ -420,16 +424,16 @@ class Page(MacroAction):
         pad.goto_page(self.number)
 
     @classmethod
-    def next(pad, key, idx):
+    def next(cls, app, key, idx):
         """Move to next page."""
-        pad.move_page(1)
+        app.macro_keypad.move_page(1)
 
     @classmethod
-    def prev(pad, key, idx):
+    def prev(cls, app, key, idx):
         """Move to previous page."""
-        pad.move_page(-1)
+        app.macro_keypad.move_page(-1)
 
     @classmethod
-    def home(pad, key, idx):
+    def home(cls, app, key, idx):
         """Move to home page."""
-        pad.move_page(0)
+        app.macro_keypad.move_page(0)
