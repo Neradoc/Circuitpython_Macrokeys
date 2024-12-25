@@ -2,8 +2,8 @@ import os
 
 machine = os.uname().machine.lower()
 if "macropad" in machine:
-    import code_macropad
+    import examples.code_macropad
 elif "keybow" in machine:
-    import code_keybow
+    import examples.code_keybow
 elif "pyportal" in machine:
-    import code_pyportal
+    import examples.code_pyportal
