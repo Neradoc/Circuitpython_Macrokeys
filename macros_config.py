@@ -3,7 +3,7 @@ Setup the Keycode and Layout modules to use in the macros.
 
 macros_config = {
 	"layout": ...,
-	"keycode": ...,
+	"keycodes": ...,
 }
 """
 # from keyboard_layout_mac_fr import KeyboardLayout
@@ -11,5 +11,5 @@ macros_config = {
 # 
 macros_config = {
 # 	"layout": KeyboardLayout,
-# 	"keycode": Keycode,
+# 	"keycodes": Keycode,
 }

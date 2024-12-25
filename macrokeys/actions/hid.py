@@ -45,13 +45,14 @@ def hid_start(config):
 
     # default US windows keycodes
     if not keycodes:
-        from adafruit_hid import keycode
+        from adafruit_hid import keycode as keycode_module
 
-        keycodes = keycode.Keycode
+        keycodes = keycode_module.Keycode
 
     # keyboard layout from config or default US windows layout
     if layout_class:
         layout = layout_class(keyboard)
+
     else:
         from adafruit_hid import keyboard_layout_us
 
