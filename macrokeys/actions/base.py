@@ -14,17 +14,17 @@ class MacroAction:
         self.actions = actions
         self.neg = neg
 
-    def press(self, pad=None):
+    def press(self, app=None, key=0, idx=0):
         pass
 
-    def release(self, pad=None):
+    def release(self, app=None, key=0, idx=0):
         pass
 
-    def action(self, pad=None):
+    def action(self, app=None, key=0, idx=0):
         if self.neg:
-            self.release(pad)
+            self.release(app, key, idx)
         else:
-            self.press(pad)
+            self.press(app, key, idx)
 
     def __neg__(self):
         return self.__class__(*self.actions, neg=not self.neg)

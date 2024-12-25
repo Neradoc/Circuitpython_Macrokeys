@@ -77,7 +77,7 @@ class Tone(MacroAction):
             acts.append((note, duration))
         super().__init__(*acts, neg=neg)
 
-    def press(self, pad=None):
+    def press(self, app, key, idx):
         for note, duration in self.actions:
             if note > 0:
                 if callable(play_tone):
@@ -108,7 +108,7 @@ class Play(MacroAction):
                 print(f"Unkown file {file}")
         super().__init__(*files, neg=neg)
 
-    def press(self, pad=None):
+    def press(self, app, key, idx):
         for file in self.actions:
             if callable(play_file):
                 play_file(file)

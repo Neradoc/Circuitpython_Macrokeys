@@ -15,8 +15,9 @@ class Color:
     - a tuple (r, g, b)
     """
 
-    def __init__(self, color, *, press=False):
-        self.press = press
+    def __init__(self, color, *, hold=True):
+        self.toggled = False
+        self.hold = hold
         if isinstance(color, tuple):
             self.color = color
         elif isinstance(color, int):
@@ -29,10 +30,10 @@ class Color:
             raise ValueError("Color value invalid, give tuple, int or hexa string")
 
     def __repr__(self):
-        return ("+" if self.press else "-") + f"Color{self.color}"
+        return ("+" if self.hold else "-") + f"Color{self.color}"
 
     def __neg__(self):
-        return self.__class__(self.color, press=not self.press)
+        return self.__class__(self.color, hold=False)
 
 
 class Night(MacroAction):
@@ -44,11 +45,11 @@ class Night(MacroAction):
         self.toggle = toggle
         super().__init__(toggle, neg=neg)
 
-    def action(self, pad):
+    def action(self, app, key, idx):
         if self.toggle:
-            pad.toggle_night_mode()
+            app.macro_keypad.toggle_night_mode()
         else:
-            pad.toggle_night_mode(not self.neg)
+            app.macro_keypad.toggle_night_mode(not self.neg)
 
     @classmethod
     def Toggle(cls):

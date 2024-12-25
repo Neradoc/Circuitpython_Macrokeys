@@ -87,13 +87,26 @@ class MacrosPage:
                     if isinstance(item, actions.MacroAction):
                         item.release(self.macro_keypad)
             elif isinstance(item, actions.MacroAction):
-                item.action(self.macro_keypad)
+                item.action(app=self, key=key_number, idx=index)
             elif isinstance(item, float):
                 time.sleep(item)
             elif isinstance(item, actions.Color):
                 if not self.macro_keypad.night_mode:
-                    self.macro_keypad.set_led(key_number, item.color)
-                    self.macro_keypad.show_leds()
+                    color = item.color
+                    if item.hold:
+                        # toggle the color
+                        if item.toggled:
+                            self.colors[key_number] = self.macros[key_number][0]
+                        else:
+                            self.colors[key_number] = item.color
+                        item.toggled = not item.toggled
+                        # change the color until change again
+                        self.macro_keypad.set_led(key_number, item.color)
+                        self.macro_keypad.show_leds()
+                    else:
+                        # change the color temporarily on press
+                        self.macro_keypad.set_led(key_number, item.color)
+                        self.macro_keypad.show_leds()
             elif callable(item):
                 item(app=self, key=key_number, idx=index)
             elif isinstance(item, int):
@@ -117,14 +130,14 @@ class MacrosPage:
         if not isinstance(sequence, (list, tuple)):
             sequence = (sequence,)
         # Release any still-pressed keys
-        for item in sequence:
+        for index, item in enumerate(sequence):
             if isinstance(item, actions.MacroAction):
-                item.release(self.macro_keypad)
+                item.release(app=self, key=key_number, idx=index)
             # compatibility
             if isinstance(item, int) and item >= 0:
                 self.macro_keypad.keyboard.release(item)
         if not self.macro_keypad.night_mode:
-            self.macro_keypad.set_led(key_number, self.macros[key_number][0])
+            self.macro_keypad.set_led(key_number, self.colors[key_number])
             self.macro_keypad.show_leds()
 
     def toggle_night_mode(self, value=None):

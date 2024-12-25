@@ -112,11 +112,11 @@ class Midi(MacroAction):
             acts.append((note, velocity))
         super().__init__(*acts, neg=neg)
 
-    def press(self, pad=None):
+    def press(self, app, key, idx):
         for note, velocity in self.actions:
             Common.midi.send(NoteOn(note, velocity))
 
-    def release(self, pad=None):
+    def release(self, app, key, idx):
         for note, velocity in self.actions:
             Common.midi.send(NoteOff(note, 0))
 

@@ -88,10 +88,10 @@ class Shortcut(MacroAction):
                 raise ValueError("Bad type of Shortcut action:" + repr(action))
         super().__init__(*acts, neg=neg)
 
-    def press(self, pad=None):
+    def press(self, app, key, idx):
         keyboard.press(*self.actions)
 
-    def release(self, pad=None):
+    def release(self, app, key, idx):
         keyboard.release(*self.actions)
 
 
@@ -104,14 +104,14 @@ class HoldKeys(Shortcut):
         super().__init__(*args, **nargs)
         self.pressed = False
 
-    def press(self, pad=None):
+    def press(self, app, key, idx):
         if self.pressed:
-            super().release(pad)
+            super().release(app, key, idx)
         else:
-            super().press(pad)
+            super().press(app, key, idx)
         self.pressed = not self.pressed
 
-    def release(self, pad=None):
+    def release(self, **args):
         pass
 
 
@@ -124,7 +124,7 @@ class Type(MacroAction):
     def __init__(self, *actions, neg=False):
         super().__init__(*actions, neg=neg)
 
-    def press(self, pad=None):
+    def press(self, app, key, idx):
         for action in self.actions:
             layout.write(action)
 
@@ -147,10 +147,10 @@ class Control(MacroAction):
             raise ValueError("Bad type of Control action:" + repr(action))
         super().__init__(code, neg=neg)
 
-    def press(self, pad=None):
+    def press(self, app, key, idx):
         control.press(*self.actions)
 
-    def release(self, pad=None):
+    def release(self, app, key, idx):
         control.release()  # only one key at a time anyway
 
 
@@ -167,7 +167,7 @@ class Mouse(MacroAction):
         self.neg = neg
         super().__init__(button, x, y, wheel, neg=neg)
 
-    def press(self, pad=None):
+    def press(self, **args):
         if self.button == 1:
             mouse.press(adafruit_hid.mouse.Mouse.LEFT_BUTTON)
         elif self.button == 2:
@@ -176,7 +176,7 @@ class Mouse(MacroAction):
             mouse.press(adafruit_hid.mouse.Mouse.MIDDLE_BUTTON)
         mouse.move(self.x, self.y, self.wheel)
 
-    def release(self, pad=None):
+    def release(self, **args):
         if self.button == 1:
             mouse.release(adafruit_hid.mouse.Mouse.LEFT_BUTTON)
         elif self.button == 2:
@@ -194,14 +194,14 @@ class HoldMouse(Mouse):
         super().__init__(*args, **nargs)
         self.pressed = False
 
-    def press(self, pad=None):
+    def press(self, app, key, idx):
         if self.pressed:
-            super().release(pad)
+            super().release(app, key, idx)
         else:
-            super().press(pad)
+            super().press(app, key, idx)
         self.pressed = not self.pressed
 
-    def release(self, pad=None):
+    def release(self, app, key, idx):
         pass
 
 
@@ -224,19 +224,19 @@ try:
             self.delay = delay
             self.task = None
 
-        async def MASH(self):
+        async def MASH(self, app, key, idx):
             while True:
                 super().press()
                 await asyncio.sleep(0.01)
                 super().release()
                 await asyncio.sleep(self.delay)
 
-        def action(self, pad):
+        def action(self, app, key, idx):
             if self.task:
                 self.task.cancel()
                 self.task = None
             else:
-                self.task = asyncio.create_task(self. MASH())
+                self.task = asyncio.create_task(self. MASH(app, key, idx))
 
 
     class MashMouse(Mouse):
@@ -250,19 +250,19 @@ try:
             self.delay = delay
             self.task = None
 
-        async def MASH(self):
+        async def MASH(self, app, key, idx):
             while True:
                 super().press()
                 await asyncio.sleep(0.01)
                 super().release()
                 await asyncio.sleep(self.delay)
 
-        def action(self, pad):
+        def action(self, app, key, idx):
             if self.task:
                 self.task.cancel()
                 self.task = None
             else:
-                self.task = asyncio.create_task(self. MASH())
+                self.task = asyncio.create_task(self. MASH(app, key, idx))
 
 
 except ImportError:
