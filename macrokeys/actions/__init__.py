@@ -8,10 +8,12 @@ from .hid import (
     hid_start,
     Shortcut,
     HoldKeys,
+    MashKeys,
     Type,
     Control,
     Mouse,
-    MashKeys,
+    HoldMouse,
+    MashMouse,
 )
 from .midi import (
     midi_start,

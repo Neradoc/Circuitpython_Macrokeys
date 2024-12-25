@@ -106,9 +106,9 @@ class HoldKeys(Shortcut):
 
     def press(self, pad=None):
         if self.pressed:
-            keyboard.release(*self.actions)
+            super().release(pad)
         else:
-            keyboard.press(*self.actions)
+            super().press(pad)
         self.pressed = not self.pressed
 
     def release(self, pad=None):
@@ -185,6 +185,26 @@ class Mouse(MacroAction):
             mouse.release(adafruit_hid.mouse.Mouse.MIDDLE_BUTTON)
 
 
+class HoldMouse(Mouse):
+    """
+    Action to auto hold a key, release when activated again.
+    """
+
+    def __init__(self, *args, **nargs):
+        super().__init__(*args, **nargs)
+        self.pressed = False
+
+    def press(self, pad=None):
+        if self.pressed:
+            super().release(pad)
+        else:
+            super().press(pad)
+        self.pressed = not self.pressed
+
+    def release(self, pad=None):
+        pass
+
+
 #####################################################################
 # Async Actions
 #####################################################################
@@ -194,6 +214,32 @@ try:
     import asyncio
 
     class MashKeys(Shortcut):
+        """
+        Action to repeatedly mash a key, until the button is pressed again
+        Requires asyncio to be available, and used in the main loop
+        """
+
+        def __init__(self, *actions, neg=False, delay=0.01):
+            super().__init__(*actions, neg=neg)
+            self.delay = delay
+            self.task = None
+
+        async def MASH(self):
+            while True:
+                super().press()
+                await asyncio.sleep(0.01)
+                super().release()
+                await asyncio.sleep(self.delay)
+
+        def action(self, pad):
+            if self.task:
+                self.task.cancel()
+                self.task = None
+            else:
+                self.task = asyncio.create_task(self. MASH())
+
+
+    class MashMouse(Mouse):
         """
         Action to repeatedly mash a key, until the button is pressed again
         Requires asyncio to be available, and used in the main loop
