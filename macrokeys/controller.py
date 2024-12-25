@@ -90,23 +90,6 @@ class MacrosPage:
                 item.action(app=self, key=key_number, idx=index)
             elif isinstance(item, float):
                 time.sleep(item)
-            elif isinstance(item, actions.Color):
-                if not self.macro_keypad.night_mode:
-                    color = item.color
-                    if item.hold:
-                        # toggle the color
-                        if item.toggled:
-                            self.colors[key_number] = self.macros[key_number][0]
-                        else:
-                            self.colors[key_number] = item.color
-                        item.toggled = not item.toggled
-                        # change the color until change again
-                        self.macro_keypad.set_led(key_number, item.color)
-                        self.macro_keypad.show_leds()
-                    else:
-                        # change the color temporarily on press
-                        self.macro_keypad.set_led(key_number, item.color)
-                        self.macro_keypad.show_leds()
             elif callable(item):
                 item(app=self, key=key_number, idx=index)
             elif isinstance(item, int):

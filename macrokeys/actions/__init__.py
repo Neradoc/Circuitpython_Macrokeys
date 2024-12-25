@@ -8,12 +8,10 @@ from .hid import (
     hid_start,
     Shortcut,
     HoldKeys,
-    MashKeys,
     Type,
     Control,
     Mouse,
     HoldMouse,
-    MashMouse,
 )
 from .midi import (
     midi_start,
@@ -25,3 +23,19 @@ from .status import (
     NightToggle,
     Page,
 )
+
+# async
+
+try:
+    import asyncio
+
+    from .hid import (
+        MashKeys,
+        MashMouse,
+    )
+    from .status import (
+        ColorBlink,
+    )
+
+except ImportError:
+    pass

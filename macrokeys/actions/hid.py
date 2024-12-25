@@ -1,16 +1,18 @@
 from .base import MacroAction
 
+from supervisor import ticks_ms
 from adafruit_hid.consumer_control import ConsumerControl
 from adafruit_hid.consumer_control_code import ConsumerControlCode
 from adafruit_hid.keyboard import Keyboard
 import adafruit_hid.mouse
+
+TOGGLE_SPEED = 200
 
 mouse = None
 keyboard = None
 control = None
 keycodes = None
 layout = None
-
 
 def hid_start(config):
     """Configure the keyboards and other devices from the user config"""
@@ -42,6 +44,10 @@ def hid_start(config):
     mouse = adafruit_hid.mouse.Mouse(hid.devices)
     keyboard = Keyboard(hid.devices)
     control = ConsumerControl(hid.devices)
+
+    # should be in adafruit_hid
+    mouse.release_all()
+    keyboard.release_all()
 
     # default US windows keycodes
     if not keycodes:
@@ -111,7 +117,7 @@ class HoldKeys(Shortcut):
             super().press(app, key, idx)
         self.pressed = not self.pressed
 
-    def release(self, **args):
+    def release(self, app, key, idx):
         pass
 
 
@@ -167,7 +173,7 @@ class Mouse(MacroAction):
         self.neg = neg
         super().__init__(button, x, y, wheel, neg=neg)
 
-    def press(self, **args):
+    def press(self, app, key, idx):
         if self.button == 1:
             mouse.press(adafruit_hid.mouse.Mouse.LEFT_BUTTON)
         elif self.button == 2:
@@ -176,7 +182,7 @@ class Mouse(MacroAction):
             mouse.press(adafruit_hid.mouse.Mouse.MIDDLE_BUTTON)
         mouse.move(self.x, self.y, self.wheel)
 
-    def release(self, **args):
+    def release(self, app, key, idx):
         if self.button == 1:
             mouse.release(adafruit_hid.mouse.Mouse.LEFT_BUTTON)
         elif self.button == 2:
@@ -209,7 +215,6 @@ class HoldMouse(Mouse):
 # Async Actions
 #####################################################################
 
-
 try:
     import asyncio
 
@@ -219,16 +224,27 @@ try:
         Requires asyncio to be available, and used in the main loop
         """
 
-        def __init__(self, *actions, neg=False, delay=0.01):
+        def __init__(self, *actions, neg=False, delay=0.01, color=0):
             super().__init__(*actions, neg=neg)
             self.delay = delay
             self.task = None
+            self.color = color
 
         async def MASH(self, app, key, idx):
+            toggle = False
+            toggle_time = 0
             while True:
-                super().press()
+                if ticks_ms() > toggle_time:
+                    toggle_time = ticks_ms() + TOGGLE_SPEED
+                    if toggle:
+                        app.macro_keypad.set_led(key, self.color)
+                    else:
+                        app.macro_keypad.set_led(key, app.colors[key])
+                    toggle = not toggle
+
+                super().press(app, key, idx)
                 await asyncio.sleep(0.01)
-                super().release()
+                super().release(app, key, idx)
                 await asyncio.sleep(self.delay)
 
         def action(self, app, key, idx):
@@ -245,16 +261,27 @@ try:
         Requires asyncio to be available, and used in the main loop
         """
 
-        def __init__(self, *actions, neg=False, delay=0.01):
+        def __init__(self, *actions, neg=False, delay=0.01, color=0):
             super().__init__(*actions, neg=neg)
             self.delay = delay
             self.task = None
+            self.color = color
 
         async def MASH(self, app, key, idx):
+            toggle = False
+            toggle_time = 0
             while True:
-                super().press()
+                if ticks_ms() > toggle_time:
+                    toggle_time = ticks_ms() + TOGGLE_SPEED
+                    if toggle:
+                        app.macro_keypad.set_led(key, self.color)
+                    else:
+                        app.macro_keypad.set_led(key, app.colors[key])
+                    toggle = not toggle
+
+                super().press(app, key, idx)
                 await asyncio.sleep(0.01)
-                super().release()
+                super().release(app, key, idx)
                 await asyncio.sleep(self.delay)
 
         def action(self, app, key, idx):
