@@ -7,6 +7,7 @@ from .audio import (
 from .hid import (
     hid_start,
     Shortcut,
+    HoldKeys,
     Type,
     Control,
     Mouse,

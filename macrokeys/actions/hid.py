@@ -95,6 +95,26 @@ class Shortcut(MacroAction):
         keyboard.release(*self.actions)
 
 
+class HoldKeys(Shortcut):
+    """
+    Action to auto hold a key, release when activated again.
+    """
+
+    def __init__(self, *args, **nargs):
+        super().__init__(*args, **nargs)
+        self.pressed = False
+
+    def press(self, pad=None):
+        if self.pressed:
+            keyboard.release(*self.actions)
+        else:
+            keyboard.press(*self.actions)
+        self.pressed = not self.pressed
+
+    def release(self, pad=None):
+        pass
+
+
 class Type(MacroAction):
     """
     Action to write a string with a layout, use via a LayoutFactory,
