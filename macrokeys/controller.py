@@ -5,6 +5,11 @@ from . import actions
 MACRO_FOLDER = "/macros"
 
 
+try:
+    from macros_config import macros_config
+except ImportError:
+    macros_config = {}
+
 class MacrosPage:
     """
     Class representing a set of macro sequences.
@@ -141,8 +146,13 @@ class ControlPad:
         if play_file:
             actions.audio.play_file = play_file
         self.macro_folder = macro_folder or MACRO_FOLDER
+
         # actions config
-        self.user_config = actions_config or {}
+        self.user_config = {}
+        if macros_config:
+            self.user_config.update(macros_config)
+        if actions_config:
+            self.user_config.update(actions_config)
 
         self._on_switch = None
         self._on_night_mode = None
@@ -302,6 +312,7 @@ class ControlPad:
         # start / configure the actiosn based on user configuration
         actions.hid_start(self.user_config)
         actions.midi_start(self.user_config)
+        actions.audio_start(self.user_config)
         # init
         self.init_macros(self.macro_folder)
         self.move_page(0)

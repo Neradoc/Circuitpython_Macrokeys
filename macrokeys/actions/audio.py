@@ -6,14 +6,18 @@ AUDIO_FILE_PATH = "/audio"
 play_tone = None
 play_file = None
 
-try:
-    import macros_config as _macros_config
+def audio_start(config):
+    global AUDIO_FILE_PATH, play_tone, play_file
 
-    if hasattr(_macros_config, "AUDIO_FILE_PATH"):
-        AUDIO_FILE_PATH = _macros_config.AUDIO_FILE_PATH
+    if "AUDIO_FILE_PATH" in config:
+        AUDIO_FILE_PATH = config["AUDIO_FILE_PATH"]
 
-except ImportError:
-    pass
+    if "play_tone" in config:
+        play_tone = config["play_tone"]
+
+    if "play_file" in config:
+        play_file = config["play_file"]
+
 
 #####################################################################
 # audio helper
