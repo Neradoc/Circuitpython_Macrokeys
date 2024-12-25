@@ -1,6 +1,24 @@
-from .base import *
-
-from .audio import Tone, Play, audio_start
-from .hid import Shortcut, Type, Control, Mouse, hid_start
-from .midi import Midi, midi_start
-from .status import Color, Night, NightToggle, Page
+from .base import MacroAction
+from .audio import (
+    audio_start,
+    Tone,
+    Play,
+)
+from .hid import (
+    hid_start,
+    Shortcut,
+    Type,
+    Control,
+    Mouse,
+    MashKeys,
+)
+from .midi import (
+    midi_start,
+    Midi,
+)
+from .status import (
+    Color,
+    Night,
+    NightToggle,
+    Page,
+)

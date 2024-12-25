@@ -67,6 +67,7 @@ class MacrosPage:
         str      ==>  type with the actions layout, for compatibility
         """
         try:
+            name = self.macros[key_number][1]
             sequence = self.macros[key_number][2]
         except IndexError:
             return
@@ -102,7 +103,7 @@ class MacrosPage:
                 # compatibility
                 actions.hid.layout.write(item)
             else:
-                print("Unkown action", item)
+                print(f"[{name}] Unknown action: {item}")
 
     def button_release(self, key_number):
         """Do things when the button/key is released."""

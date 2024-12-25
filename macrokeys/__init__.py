@@ -1,15 +1,4 @@
-from .actions import (
-    Control,
-    Midi,
-    Mouse,
-    Night,
-    NightToggle,
-    Page,
-    Play,
-    Shortcut,
-    Tone,
-    Type,
-)
+from .actions import *
 
 # aliases
 S = Shortcut

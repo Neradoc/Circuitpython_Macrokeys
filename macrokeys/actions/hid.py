@@ -63,6 +63,7 @@ def hid_start(config):
 # Actions subclasses
 #####################################################################
 
+
 class Shortcut(MacroAction):
     """
     Action to press/release a list of keycodes together.
@@ -162,3 +163,42 @@ class Mouse(MacroAction):
             mouse.release(adafruit_hid.mouse.Mouse.RIGHT_BUTTON)
         elif self.button == 3:
             mouse.release(adafruit_hid.mouse.Mouse.MIDDLE_BUTTON)
+
+
+#####################################################################
+# Async Actions
+#####################################################################
+
+
+try:
+    import asyncio
+
+    class MashKeys(Shortcut):
+        """
+        Action to repeatedly mash a key, until the button is pressed again
+        Requires asyncio to be available, and used in the main loop
+        """
+
+        def __init__(self, *actions, neg=False, delay=0.01):
+            super().__init__(*actions, neg=neg)
+            self.delay = delay
+            self.task = None
+
+        async def MASH(self):
+            while True:
+                super().press()
+                await asyncio.sleep(0.01)
+                super().release()
+                await asyncio.sleep(self.delay)
+
+        def action(self, pad):
+            if self.task:
+                self.task.cancel()
+                self.task = None
+            else:
+                self.task = asyncio.create_task(self. MASH())
+
+
+except ImportError:
+    pass
+
