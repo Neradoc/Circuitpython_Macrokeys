@@ -36,6 +36,8 @@ class MacrosPage:
 
     def switch(self, prev_app=None):
         """Activate a page settings."""
+        # disable night mode
+        self.toggle_night_mode(False)
         # the previous app's "leave" custom code
         if prev_app and prev_app._leave:
             if isinstance(prev_app._leave, actions.MacroAction):
