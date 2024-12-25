@@ -10,7 +10,7 @@ class KeypadModuleDriver(ControlPad):
         )
         self.backend = backend
 
-    def update_keys(self):
+    def update(self):
         event = self.backend.events.get()
         if event:
             key_number = event.key_number

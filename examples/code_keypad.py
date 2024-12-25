@@ -42,4 +42,4 @@ while True:
         print(f"Switching to next page")
         macro_keypad.move_page(1)
     else:
-        macro_keypad.update_keys()
+        macro_keypad.update()

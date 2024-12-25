@@ -56,6 +56,10 @@ from consumer_control_extended.ConsumerControlExtended import *
     (0x202000, 'Calc', Control(AL_CALCULATOR)),
 ```
 
+### Button Mashing
+
+Button mashing requires running the main loop with asyncio, and will be incompatible with pauses and 
+
 ### Mouse
 
 Note that mouse movements are relative, and depend on the computer's setup. They are only done once on press and not repeated in this implementation. Mouse buttons are held until the macro key is released.
@@ -182,10 +186,30 @@ The keyboard layout and keycode can be configured in the `macros_config.py` file
 
 ```py
 from keyboard_layout_mac_fr import KeyboardLayout
-default_layout = KeyboardLayout
 from keycode_mac_fr import Keycode
-default_keycode = Keycode
+
+macros_config = {
+	"layout": KeyboardLayout,
+	"keycodes": Keycode,
+}
 ```
+
+
+### Async calling
+
+Running the loop with asyncio allows macros to setup actions as tasks that will keep running until canceled. This requires a main run loop like this:
+
+```py
+import asyncio
+
+async def main():
+    while True:
+        macro_keypad.update()
+        await asyncio.sleep(0)
+
+asyncio.run(main())
+```
+
 
 <!-- 
 ## Support for different types of keypads

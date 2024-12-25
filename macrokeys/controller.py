@@ -10,6 +10,7 @@ try:
 except ImportError:
     macros_config = {}
 
+
 class MacrosPage:
     """
     Class representing a set of macro sequences.
