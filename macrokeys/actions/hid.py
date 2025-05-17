@@ -242,9 +242,9 @@ try:
                         app.macro_keypad.set_led(key, app.colors[key])
                     toggle = not toggle
 
-                super().press(app, key, idx)
+                self.press(app, key, idx)
                 await asyncio.sleep(0.01)
-                super().release(app, key, idx)
+                self.release(app, key, idx)
                 await asyncio.sleep(self.delay)
 
         def action(self, app, key, idx):
@@ -279,9 +279,9 @@ try:
                         app.macro_keypad.set_led(key, app.colors[key])
                     toggle = not toggle
 
-                super().press(app, key, idx)
+                self.press(app, key, idx)
                 await asyncio.sleep(0.01)
-                super().release(app, key, idx)
+                self.release(app, key, idx)
                 await asyncio.sleep(self.delay)
 
         def action(self, app, key, idx):
