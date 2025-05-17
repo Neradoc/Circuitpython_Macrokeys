@@ -29,6 +29,10 @@ Press or release one or more keys with a keycode name as strings. It presses the
     (0x004000, 'Things', [ S("ALT", "A"), 0, S("ALT", "B") ]),
 # releasing one (holding ALT)
     (0x004000, 'Other', [ S("ALT", "A"), -S("A"), S("B") ]),
+# hold keys (toggle)
+    (0x0000FF, 'Hold Key', [ HoldKeys("SPACE") ]),
+# hold a mouse button
+    (0x0000FF, 'Hold Mouse', [ HoldMouse(1) ]),
 ```
 
 ### Type a string
@@ -58,7 +62,13 @@ from consumer_control_extended.ConsumerControlExtended import *
 
 ### Button Mashing
 
-Button mashing requires running the main loop with asyncio, and will be incompatible with pauses and 
+Button mashing requires running the main loop with asyncio, and will be incompatible with pauses and other actions that require synchronous execution.
+
+```py
+# mashing a key and the mouse
+    (0x000080, 'Mashes', [ MashKeys("SPACE"), MashMouse(1) ]),
+```
+
 
 ### Mouse
 
@@ -140,7 +150,7 @@ app = {
 ## Mixing
 
 ```py
-# type a blod string in some text editor, possibly, and beep
+# type a bold string in some text editor, possibly, and beep
     (0x004000, 'Bold String',
         [
             Shortcut("CONTROL", "B"), # shortcut
